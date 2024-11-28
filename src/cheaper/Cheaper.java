@@ -30,16 +30,18 @@ public class Cheaper {
         try (Connection connection = DriverManager.getConnection(url, user, password)) {
             // Если соединение успешно установлено
             System.out.println("Connected to the PostgreSQL server successfully.");
+            System.out.println(connection.getSchema());
             ArrayList<Store> stores = new ArrayList<>();
             Statement statement = connection.createStatement();
             ArrayList<String> storeNames = new ArrayList<>();
             storeNames.add("ptrchka");
             storeNames.add("dixy");
             storeNames.add("lenta");
+            
             ArrayList<String> queryList = new ArrayList<>();
             for (Iterator<String> iterator = storeNames.iterator(); iterator.hasNext();) {
                 String next = iterator.next();
-                queryList.add("SELECT * FROM " + next + "_products");
+                queryList.add("SELECT * FROM " + next + "_products;");
                 
             }
             for (int i = 0; i < queryList.size(); i++) {
