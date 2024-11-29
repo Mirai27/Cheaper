@@ -71,7 +71,6 @@ public class Cheaper {
                     // Добавляем продукт в список
                     productsList.add(product);
                 }
-                System.out.println(products.size());
                 stores.add(new Store(storeNames.get(i), products));
             }
             ApplicationWindow ap = new ApplicationWindow(); 
