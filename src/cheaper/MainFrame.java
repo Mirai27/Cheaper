@@ -13,7 +13,9 @@ import java.awt.Toolkit;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -83,11 +85,14 @@ public class MainFrame extends javax.swing.JFrame {
      private JPanel createProductPanel(Store store) {
         JPanel panel = new JPanel();
         panel.setLayout(new GridLayout(5, 3)); // Вертикальная раскладка
-        ArrayList<Product> products = store.getProducts();
-        for (Product product : products) {
-            panel.add(new ProductPanel(product));
+        // Добавляем продукты на панель согласно HashMap
+        HashMap<String, ArrayList<Product>> products = store.getProducts();
+        for (ArrayList<Product> items : products.values()) {
+            for (Product product : items) {
+                panel.add(new ProductPanel(product));
+            }
         }
-
+   
         return panel;
     }
     private void updateGridLayout(JPanel panel) {

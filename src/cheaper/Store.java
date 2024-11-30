@@ -5,6 +5,7 @@
 package cheaper;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  *
@@ -12,9 +13,9 @@ import java.util.ArrayList;
  */
 public class Store {
     private String name;
-    private ArrayList<Product> products = new ArrayList<>();
+    private HashMap<String, ArrayList<Product>> products = new HashMap<>();
 
-    public Store(String name, ArrayList<Product> products) {
+    public Store(String name, HashMap<String, ArrayList<Product>> products) {
         this.name = name;
         this.products = products;
     }
@@ -30,13 +31,11 @@ public class Store {
         this.name = name;
     }
 
-    public ArrayList<Product> getProducts() {
+    public HashMap<String, ArrayList<Product>> getProducts() {
         return products;
     }
 
-    public void setProducts(ArrayList<Product> products) {
+    public void setProducts(HashMap<String, ArrayList<Product>> products) {
         this.products = products;
     }
-    
-    
 }
