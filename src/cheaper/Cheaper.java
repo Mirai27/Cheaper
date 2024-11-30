@@ -79,5 +79,4 @@ public class Cheaper {
             Logger.getLogger(Cheaper.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-    
 }

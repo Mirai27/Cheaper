@@ -20,8 +20,7 @@ public class Store {
         this.products = products;
     }
 
-    public Store() {
-    }
+    public Store() {}
 
     public String getName() {
         return name;
