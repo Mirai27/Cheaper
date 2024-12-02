@@ -28,7 +28,7 @@ public class ProductPanel extends JPanel {
         
         increaseButton = new JButton("+");
         decreaseButton = new JButton("-");
-        quantityLabel = new JLabel("Количество: " + quantity);
+        quantityLabel = new JLabel("Кол-во: " + quantity);
 
         // Панель для кнопок
         JPanel buttonPanel = new JPanel();
@@ -42,7 +42,7 @@ public class ProductPanel extends JPanel {
             public void actionPerformed(ActionEvent e) {
                 quantity++;
                 updateQuantityDisplay();
-                // Здесь вы могли бы также обновить количество в базе данных
+                // Здесь бы также обновить количество в базе данных
             }
         });
 
@@ -52,11 +52,11 @@ public class ProductPanel extends JPanel {
                 if (quantity > 0) {
                     quantity--;
                     updateQuantityDisplay();
-                    // Здесь вы могли бы также обновить количество в базе данных
+                    // Здесь бы также обновить количество в базе данных
                 }
             }
         });
-
+        
         // Организация компонентов на панели
         add(nameLabel, BorderLayout.NORTH);
         //add(imageLabel, BorderLayout.CENTER);
@@ -67,7 +67,15 @@ public class ProductPanel extends JPanel {
         setBorder(BorderFactory.createLineBorder(Color.BLACK)); // Опционально
     }
 
+    public Product getProduct() {
+        return product;
+    }
+    
+    public String getCategory() {
+        return product.getCategory();
+    }
+    
     private void updateQuantityDisplay() {
-        quantityLabel.setText("Количество: " + quantity);
+        quantityLabel.setText("Кол-во: " + quantity);
     }
 }
