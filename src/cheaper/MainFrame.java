@@ -125,18 +125,15 @@ public class MainFrame extends javax.swing.JFrame {
                 System.out.println("Выбрано: " + selectedButton.getText());
                 if ("Все".equals(selectedButton.getText())) {
                     for (int i = 0; i < storePanels.size(); i++) {
-                    for (Component component : storePanels.get(i).getComponents()) {
-                        if (component instanceof JPanel) {
-                            ProductPanel productPanel = (ProductPanel) component;
-                            //productPanel.setVisible(true);
-                            copyPanelContents(storePanelsOriginal.get(i), storePanels.get(i));
-                        }
-                    }
+                        //productPanel.setVisible(true);
+                        copyPanelContents(storePanelsOriginal.get(i), storePanels.get(i));
                     storePanels.get(i).revalidate();     // Обновляем раскладку
                     storePanels.get(i).repaint();        // Перерисовываем интерфейс
                     scrollPanes.get(i).revalidate();
                     scrollPanes.get(i).repaint();
                     }
+                    tabbedPane.revalidate();
+                    tabbedPane.repaint();
                 }
                 else {
                     for (int i = 0; i < storePanels.size(); i++) {
@@ -151,12 +148,14 @@ public class MainFrame extends javax.swing.JFrame {
                                 storePanels.get(i).remove(productPanel);
                             }
                         }
+                        
                         storePanels.get(i).revalidate();     // Обновляем раскладку
                         storePanels.get(i).repaint();        // Перерисовываем интерфейс
                         scrollPanes.get(i).revalidate();
                         scrollPanes.get(i).repaint();
                     }
-                    
+                    tabbedPane.revalidate();
+                    tabbedPane.repaint();
                 }
                 }
             }
