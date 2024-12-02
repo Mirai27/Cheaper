@@ -11,6 +11,7 @@ import java.util.HashMap;
  * @author fantas
  */
 class Basket {
+    // Словарь: ключ - Продукт, значение - его Количество 
     private HashMap<Product, Integer> products = new HashMap<>();
 
     public Basket(HashMap<Product, Integer> products){

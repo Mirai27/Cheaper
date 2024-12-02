@@ -4,6 +4,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 public class ProductPanel extends JPanel {
 
@@ -14,10 +16,18 @@ public class ProductPanel extends JPanel {
     private JButton decreaseButton;
     private JLabel quantityLabel;
     private int quantity;
+    private Basket basket;
 
-    public ProductPanel(Product product) {
+    public ProductPanel(Product product, Basket basket) {
         this.product = product;
-        this.quantity = 0; // Начальное количество, возможно, из базы данных
+        this.basket = basket;
+        // Получаем количество продуктов из корзины
+        HashMap<Product, Integer> productsFromBasket = basket.getProducts();
+        Integer quantityFromBasket = productsFromBasket.get(this.product);
+        if (quantityFromBasket == null) {
+            quantityFromBasket = 0;
+        }
+        this.quantity = quantityFromBasket;
 
         setLayout(new BorderLayout());
 
@@ -37,26 +47,30 @@ public class ProductPanel extends JPanel {
         buttonPanel.add(increaseButton);
 
         // Добавление слушателей
-        increaseButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
+        increaseButton.addActionListener((ActionEvent e) -> {
+            // Получаем максимальное количество товара в магазине
+            int maxQuantity = this.product.getTotal_quantity();
+            System.out.println(maxQuantity);
+            if (quantity < maxQuantity){
                 quantity++;
+                this.basket.addProduct(this.product);
                 updateQuantityDisplay();
-                // Здесь бы также обновить количество в базе данных
             }
+            else{
+                // Показываем сообщение об ошибке
+                JOptionPane.showMessageDialog(this, "Вы достигли максимального числа продуктов", "Предупреждение", JOptionPane.WARNING_MESSAGE);
+            }
+            
         });
 
-        decreaseButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (quantity > 0) {
-                    quantity--;
-                    updateQuantityDisplay();
-                    // Здесь бы также обновить количество в базе данных
-                }
+        decreaseButton.addActionListener((ActionEvent e) -> {
+            if (quantity > 0) {
+                quantity--;
+                this.basket.subtractProduct(this.product);
+                updateQuantityDisplay();
             }
         });
-        
+     
         // Организация компонентов на панели
         add(nameLabel, BorderLayout.NORTH);
         //add(imageLabel, BorderLayout.CENTER);
