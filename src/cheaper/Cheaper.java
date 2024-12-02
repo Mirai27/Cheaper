@@ -73,8 +73,9 @@ public class Cheaper {
                 }
                 stores.add(new Store(storeNames.get(i), products));
             }
+            Basket basket = new Basket();
             ApplicationWindow ap = new ApplicationWindow(); 
-            MainFrame mainFrame = new MainFrame(stores);    
+            MainFrame mainFrame = new MainFrame(stores, basket);    
         } catch (SQLException ex) {
             Logger.getLogger(Cheaper.class.getName()).log(Level.SEVERE, null, ex);
         }

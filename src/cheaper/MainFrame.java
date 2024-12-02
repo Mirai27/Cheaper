@@ -43,16 +43,16 @@ public class MainFrame extends javax.swing.JFrame {
     public MainFrame() {
     }
 
-    public MainFrame(ArrayList<Store> stores) {
+    public MainFrame(ArrayList<Store> stores, Basket basket) {
         initComponents();
         setTitle("Cheaper");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         JTabbedPane tabbedPane = new JTabbedPane();
         // Создание панелей с продуктами
-        JPanel storePanel0 = createProductPanel(stores.get(0));
-        JPanel storePanel1 = createProductPanel(stores.get(1));
-        JPanel storePanel2 = createProductPanel(stores.get(2));
+        JPanel storePanel0 = createProductPanel(stores.get(0), basket);
+        JPanel storePanel1 = createProductPanel(stores.get(1), basket);
+        JPanel storePanel2 = createProductPanel(stores.get(2), basket);
         
         ArrayList<JPanel> storePanels = new ArrayList<>();
         storePanels.add(storePanel0);
@@ -60,9 +60,9 @@ public class MainFrame extends javax.swing.JFrame {
         storePanels.add(storePanel2);
         
         
-        JPanel storePanelOriginal0 = createProductPanel(stores.get(0));
-        JPanel storePanelOriginal1 = createProductPanel(stores.get(1));
-        JPanel storePanelOriginal2 = createProductPanel(stores.get(2));
+        JPanel storePanelOriginal0 = createProductPanel(stores.get(0), basket);
+        JPanel storePanelOriginal1 = createProductPanel(stores.get(1), basket);
+        JPanel storePanelOriginal2 = createProductPanel(stores.get(2), basket);
         
         ArrayList<JPanel> storePanelsOriginal = new ArrayList<>();
         storePanelsOriginal.add(storePanelOriginal0);
@@ -118,37 +118,32 @@ public class MainFrame extends javax.swing.JFrame {
         
         
         // Добавление ActionListener к каждой радиокнопке
-        ActionListener actionListener = new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                JRadioButton selectedButton = (JRadioButton) e.getSource();
-                System.out.println("Выбрано: " + selectedButton.getText());
-                if ("Все".equals(selectedButton.getText())) {
-                    for (int i = 0; i < storePanels.size(); i++) {
-                        //productPanel.setVisible(true);
-                        copyPanelContents(storePanelsOriginal.get(i), storePanels.get(i));
+        ActionListener actionListener = (ActionEvent e) -> {
+            JRadioButton selectedButton = (JRadioButton) e.getSource();
+            if ("Все".equals(selectedButton.getText())) {
+                for (int i = 0; i < storePanels.size(); i++) {
+                    //productPanel.setVisible(true);
+                    copyPanelContents(storePanelsOriginal.get(i), storePanels.get(i), basket);
                     storePanels.get(i).revalidate();     // Обновляем раскладку
                     storePanels.get(i).repaint();        // Перерисовываем интерфейс
                     scrollPanes.get(i).revalidate();
                     scrollPanes.get(i).repaint();
-                    }
-                    tabbedPane.revalidate();
-                    tabbedPane.repaint();
                 }
-                else {
-                    for (int i = 0; i < storePanels.size(); i++) {
-                    copyPanelContents(storePanelsOriginal.get(i), storePanels.get(i));
-                    for (Component component : storePanels.get(i).getComponents()) {
-                        if (component instanceof ProductPanel) {  // Убедитесь, что вы используете правильный класс
-                            ProductPanel productPanel = (ProductPanel) component;
+                tabbedPane.revalidate();
+                tabbedPane.repaint();
+            } else {
+                for (int i = 0; i < storePanels.size(); i++) {
+                    copyPanelContents(storePanelsOriginal.get(i), storePanels.get(i), basket);
+                    for (Component component1 : storePanels.get(i).getComponents()) {
+                        if (component1 instanceof ProductPanel) {
+                            // Убедитесь, что вы используете правильный класс
+                            ProductPanel productPanel = (ProductPanel) component1;
                             //productPanel.setVisible(true);
-                            
                             if ((!productPanel.getCategory().equals(selectedButton.getText()))) {
                                 //productPanel.setVisible(false);
                                 storePanels.get(i).remove(productPanel);
                             }
                         }
-                        
                         storePanels.get(i).revalidate();     // Обновляем раскладку
                         storePanels.get(i).repaint();        // Перерисовываем интерфейс
                         scrollPanes.get(i).revalidate();
@@ -156,7 +151,6 @@ public class MainFrame extends javax.swing.JFrame {
                     }
                     tabbedPane.revalidate();
                     tabbedPane.repaint();
-                }
                 }
             }
         };
@@ -182,31 +176,31 @@ public class MainFrame extends javax.swing.JFrame {
         
     }
     
-    private static void copyPanelContents(JPanel source, JPanel target) {
-    target.removeAll(); // Очистка целевой панели
+    private static void copyPanelContents(JPanel source, JPanel target, Basket basket) {
+        target.removeAll(); // Очистка целевой панели
 
-    for (Component comp : source.getComponents()) {
-        if (comp instanceof ProductPanel) {
-            ProductPanel originalPanel = (ProductPanel) comp;
-            // Предполагая, что существует метод для клонирования или копирования ProductPanel
-            ProductPanel newPanel = new ProductPanel(originalPanel.getProduct());
-            target.add(newPanel);
+        for (Component comp : source.getComponents()) {
+            if (comp instanceof ProductPanel) {
+                ProductPanel originalPanel = (ProductPanel) comp;
+                // Предполагая, что существует метод для клонирования или копирования ProductPanel
+                ProductPanel newPanel = new ProductPanel(originalPanel.getProduct(), basket);
+                target.add(newPanel);
+            }
         }
-    }
 
-    target.revalidate(); // Обновление компоновки
-    target.repaint();    // Перерисовка интерфейса
+        target.revalidate(); // Обновление компоновки
+        target.repaint();    // Перерисовка интерфейса
 }
 
     
-     private JPanel createProductPanel(Store store) {
+     private JPanel createProductPanel(Store store, Basket basket) {
         JPanel panel = new JPanel();
         panel.setLayout(new GridLayout(5, 3)); // Вертикальная раскладка
         // Добавляем продукты на панель согласно HashMap
         HashMap<String, ArrayList<Product>> products = store.getProducts();
         for (ArrayList<Product> items : products.values()) {
             for (Product product : items) {
-                panel.add(new ProductPanel(product));
+                panel.add(new ProductPanel(product, basket));
             }
         }
    

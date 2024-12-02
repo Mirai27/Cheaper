@@ -13,7 +13,7 @@ public class ApplicationWindow {
 
     private void setLookAndFeel() {
         try {
-//             Установка Nimbus Look and Feel
+             // Установка Nimbus Look and Feel
              for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
                  if ("Nimbus".equals(info.getName())) {
                      UIManager.setLookAndFeel(info.getClassName());
