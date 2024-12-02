@@ -5,21 +5,28 @@
 package cheaper;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
+import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 
@@ -47,10 +54,33 @@ public class MainFrame extends javax.swing.JFrame {
         JPanel storePanel1 = createProductPanel(stores.get(1));
         JPanel storePanel2 = createProductPanel(stores.get(2));
         
+        ArrayList<JPanel> storePanels = new ArrayList<>();
+        storePanels.add(storePanel0);
+        storePanels.add(storePanel1);
+        storePanels.add(storePanel2);
+        
+        
+        JPanel storePanelOriginal0 = createProductPanel(stores.get(0));
+        JPanel storePanelOriginal1 = createProductPanel(stores.get(1));
+        JPanel storePanelOriginal2 = createProductPanel(stores.get(2));
+        
+        ArrayList<JPanel> storePanelsOriginal = new ArrayList<>();
+        storePanelsOriginal.add(storePanelOriginal0);
+        storePanelsOriginal.add(storePanelOriginal1);
+        storePanelsOriginal.add(storePanelOriginal2);
+        
         JScrollPane scrollPane0 = new JScrollPane(storePanel0);
         JScrollPane scrollPane1 = new JScrollPane(storePanel1);
         JScrollPane scrollPane2 = new JScrollPane(storePanel2);
-
+        
+        ArrayList<JScrollPane> scrollPanes = new ArrayList<>();
+        scrollPanes.add(scrollPane0);
+        scrollPanes.add(scrollPane1);
+        scrollPanes.add(scrollPane2);
+        
+        scrollPane0.getVerticalScrollBar().setUnitIncrement(16);
+        scrollPane1.getVerticalScrollBar().setUnitIncrement(16);
+        scrollPane2.getVerticalScrollBar().setUnitIncrement(16);
         
         tabbedPane.addTab("Магазин 0", scrollPane0);
         tabbedPane.addTab("Магазин 1", scrollPane1);
@@ -62,6 +92,7 @@ public class MainFrame extends javax.swing.JFrame {
                 updateGridLayout(storePanel0); // Обновляем раскладку панели
                 updateGridLayout(storePanel1); // Обновляем раскладку панели
                 updateGridLayout(storePanel2); // Обновляем раскладку панели
+                updateGridLayout(jPanel3);
             }
         });
         
@@ -78,10 +109,97 @@ public class MainFrame extends javax.swing.JFrame {
         jPanel2.add(tabbedPane, constraints);
         
         
+        jPanel3.setLayout(new GridBagLayout());
+        Set<String> categories = new TreeSet<>();
+        
+        for (Store item : stores) {
+            categories.addAll(item.getProducts().keySet());
+        }
+        
+        
+        // Добавление ActionListener к каждой радиокнопке
+        ActionListener actionListener = new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JRadioButton selectedButton = (JRadioButton) e.getSource();
+                System.out.println("Выбрано: " + selectedButton.getText());
+                if ("Все".equals(selectedButton.getText())) {
+                    for (int i = 0; i < storePanels.size(); i++) {
+                    for (Component component : storePanels.get(i).getComponents()) {
+                        if (component instanceof JPanel) {
+                            ProductPanel productPanel = (ProductPanel) component;
+                            //productPanel.setVisible(true);
+                            copyPanelContents(storePanelsOriginal.get(i), storePanels.get(i));
+                        }
+                    }
+                    storePanels.get(i).revalidate();     // Обновляем раскладку
+                    storePanels.get(i).repaint();        // Перерисовываем интерфейс
+                    scrollPanes.get(i).revalidate();
+                    scrollPanes.get(i).repaint();
+                    }
+                }
+                else {
+                    for (int i = 0; i < storePanels.size(); i++) {
+                    copyPanelContents(storePanelsOriginal.get(i), storePanels.get(i));
+                    for (Component component : storePanels.get(i).getComponents()) {
+                        if (component instanceof ProductPanel) {  // Убедитесь, что вы используете правильный класс
+                            ProductPanel productPanel = (ProductPanel) component;
+                            //productPanel.setVisible(true);
+                            
+                            if ((!productPanel.getCategory().equals(selectedButton.getText()))) {
+                                //productPanel.setVisible(false);
+                                storePanels.get(i).remove(productPanel);
+                            }
+                        }
+                        storePanels.get(i).revalidate();     // Обновляем раскладку
+                        storePanels.get(i).repaint();        // Перерисовываем интерфейс
+                        scrollPanes.get(i).revalidate();
+                        scrollPanes.get(i).repaint();
+                    }
+                    
+                }
+                }
+            }
+        };
+        ButtonGroup categoriesGroup = new ButtonGroup();
+        JRadioButton allButton = new JRadioButton("Все");
+        allButton.setSelected(true);
+        allButton.addActionListener(actionListener);
+        categoriesGroup.add(allButton);
+        jPanel3.add(allButton);
+        for (String category : categories) {
+            JRadioButton button = new JRadioButton(category);
+            button.addActionListener(actionListener);
+            categoriesGroup.add(button);
+            jPanel3.add(button);
+        }
+        
+        
+        
+        
         pack();
+        setExtendedState(JFrame.MAXIMIZED_BOTH); 
         setVisible(true);
         
     }
+    
+    private static void copyPanelContents(JPanel source, JPanel target) {
+    target.removeAll(); // Очистка целевой панели
+
+    for (Component comp : source.getComponents()) {
+        if (comp instanceof ProductPanel) {
+            ProductPanel originalPanel = (ProductPanel) comp;
+            // Предполагая, что существует метод для клонирования или копирования ProductPanel
+            ProductPanel newPanel = new ProductPanel(originalPanel.getProduct());
+            target.add(newPanel);
+        }
+    }
+
+    target.revalidate(); // Обновление компоновки
+    target.repaint();    // Перерисовка интерфейса
+}
+
+    
      private JPanel createProductPanel(Store store) {
         JPanel panel = new JPanel();
         panel.setLayout(new GridLayout(5, 3)); // Вертикальная раскладка
@@ -95,6 +213,7 @@ public class MainFrame extends javax.swing.JFrame {
    
         return panel;
     }
+     
     private void updateGridLayout(JPanel panel) {
         // Получите ширину экрана
         int width = getWidth();
@@ -156,7 +275,7 @@ public class MainFrame extends javax.swing.JFrame {
         jTextField2 = new javax.swing.JTextField();
         jButton1 = new javax.swing.JButton();
         jButton2 = new javax.swing.JButton();
-        jLabel1 = new javax.swing.JLabel();
+        jPanel3 = new javax.swing.JPanel();
         jPanel2 = new javax.swing.JPanel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
@@ -200,23 +319,29 @@ public class MainFrame extends javax.swing.JFrame {
         gridBagConstraints.insets = new java.awt.Insets(6, 6, 0, 6);
         jPanel1.add(jButton2, gridBagConstraints);
 
-        jLabel1.setText("jLabel1");
+        javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
+        jPanel3.setLayout(jPanel3Layout);
+        jPanel3Layout.setHorizontalGroup(
+            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 1280, Short.MAX_VALUE)
+        );
+        jPanel3Layout.setVerticalGroup(
+            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 100, Short.MAX_VALUE)
+        );
+
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 1;
         gridBagConstraints.gridwidth = 9;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.ipadx = 187;
-        gridBagConstraints.ipady = 11;
-        gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(6, 6, 6, 6);
-        jPanel1.add(jLabel1, gridBagConstraints);
+        jPanel1.add(jPanel3, gridBagConstraints);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.gridwidth = 20;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weightx = 1.0;
         gridBagConstraints.weighty = 0.1;
         getContentPane().add(jPanel1, gridBagConstraints);
@@ -238,7 +363,7 @@ public class MainFrame extends javax.swing.JFrame {
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 1;
-        gridBagConstraints.gridwidth = 22;
+        gridBagConstraints.gridwidth = 20;
         gridBagConstraints.gridheight = 11;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weightx = 1.0;
@@ -290,9 +415,9 @@ public class MainFrame extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
-    private javax.swing.JLabel jLabel1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
+    private javax.swing.JPanel jPanel3;
     private javax.swing.JTextField jTextField2;
     // End of variables declaration//GEN-END:variables
 }
