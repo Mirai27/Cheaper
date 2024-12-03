@@ -37,4 +37,13 @@ public class Store {
     public void setProducts(HashMap<String, ArrayList<Product>> products) {
         this.products = products;
     }
+    
+    public boolean isProduct(String category, Product product){
+        ArrayList<Product> productsList = products.get(category);
+        if (productsList == null) {
+            // Если категории нет
+            return false;
+        }
+        return productsList.contains(product);
+    }
 }

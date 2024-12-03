@@ -183,7 +183,7 @@ public class MainFrame extends javax.swing.JFrame {
             if (comp instanceof ProductPanel) {
                 ProductPanel originalPanel = (ProductPanel) comp;
                 // Предполагая, что существует метод для клонирования или копирования ProductPanel
-                ProductPanel newPanel = new ProductPanel(originalPanel.getProduct(), basket);
+                ProductPanel newPanel = new ProductPanel(originalPanel.getProduct(), basket, originalPanel.getStore());
                 target.add(newPanel);
             }
         }
@@ -200,7 +200,7 @@ public class MainFrame extends javax.swing.JFrame {
         HashMap<String, ArrayList<Product>> products = store.getProducts();
         for (ArrayList<Product> items : products.values()) {
             for (Product product : items) {
-                panel.add(new ProductPanel(product, basket));
+                panel.add(new ProductPanel(product, basket, store));
             }
         }
    

@@ -6,6 +6,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 
 public class ProductPanel extends JPanel {
 
@@ -16,11 +17,10 @@ public class ProductPanel extends JPanel {
     private JButton decreaseButton;
     private JLabel quantityLabel;
     private int quantity;
-    private Basket basket;
+    private Store store;
 
-    public ProductPanel(Product product, Basket basket) {
+    public ProductPanel(Product product, Basket basket, Store store) {
         this.product = product;
-        this.basket = basket;
         // Получаем количество продуктов из корзины
         HashMap<Product, Integer> productsFromBasket = basket.getProducts();
         Integer quantityFromBasket = productsFromBasket.get(this.product);
@@ -28,7 +28,8 @@ public class ProductPanel extends JPanel {
             quantityFromBasket = 0;
         }
         this.quantity = quantityFromBasket;
-
+        this.store = store;
+        
         setLayout(new BorderLayout());
 
         // Создание компонентов
@@ -48,25 +49,53 @@ public class ProductPanel extends JPanel {
 
         // Добавление слушателей
         increaseButton.addActionListener((ActionEvent e) -> {
-            // Получаем максимальное количество товара в магазине
-            int maxQuantity = this.product.getTotal_quantity();
-            System.out.println(maxQuantity);
-            if (quantity < maxQuantity){
-                quantity++;
-                this.basket.addProduct(this.product);
-                updateQuantityDisplay();
+            boolean isAdd = true;
+            // Если корзина не пустая
+            if (!basket.isEmpty()) {
+                // Получаем Продукс из корзины
+                Iterator<Product> iterator = basket.getProducts().keySet().iterator();
+                Product productFromBasket = iterator.next();
+                // Если Этого продукта нет в текущем магазине
+                if (!store.isProduct(productFromBasket.getCategory(), productFromBasket)) {
+                    // Показываем диалоговое окно с возможностью очистить корзину
+                    int result = JOptionPane.showOptionDialog(
+                            this,
+                            "В корзине обнаружены товары из другого магазина. Что вы хотите сделать?",
+                            "Ошибка",
+                            JOptionPane.YES_NO_OPTION,
+                            JOptionPane.ERROR_MESSAGE,
+                            null,
+                            new Object[]{"Очистить корзину", "Отмена"},
+                            "Отмена"
+                    );
+
+                    if (result == JOptionPane.YES_OPTION) {
+                        basket.clear(); // Предположим, что у вас есть метод для очистки корзины
+                    } else {
+                        // Отмена действия
+                        isAdd = false;
+                    }
+                }
             }
-            else{
-                // Показываем сообщение об ошибке
-                JOptionPane.showMessageDialog(this, "Вы достигли максимального числа продуктов", "Предупреждение", JOptionPane.WARNING_MESSAGE);
+            if (isAdd){
+                // Получаем максимальное количество товара в магазине
+                int maxQuantity = this.product.getTotal_quantity();
+                if (quantity < maxQuantity){
+                    quantity++;
+                    basket.addProduct(this.product);
+                    updateQuantityDisplay();
+                }
+                else{
+                    // Показываем сообщение об ошибке
+                    JOptionPane.showMessageDialog(this, "Вы достигли максимального числа продуктов", "Предупреждение", JOptionPane.WARNING_MESSAGE);
+                }
             }
-            
         });
 
         decreaseButton.addActionListener((ActionEvent e) -> {
             if (quantity > 0) {
                 quantity--;
-                this.basket.subtractProduct(this.product);
+                basket.subtractProduct(this.product);
                 updateQuantityDisplay();
             }
         });
@@ -87,6 +116,10 @@ public class ProductPanel extends JPanel {
     
     public String getCategory() {
         return product.getCategory();
+    }
+    
+    public Store getStore() {
+        return store;
     }
     
     private void updateQuantityDisplay() {
