@@ -42,4 +42,12 @@ class Basket {
         // Если Товара нет в корзине ничего не делаем
          products.computeIfPresent(product, (k, v) -> v > 1 ? v - 1 : null);
     }
+    
+    public boolean isEmpty(){
+        return products.isEmpty();
+    }
+    
+     public void clear(){
+        products.clear();
+    }
 }
