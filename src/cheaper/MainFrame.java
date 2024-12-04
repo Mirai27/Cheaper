@@ -207,8 +207,11 @@ public class MainFrame extends javax.swing.JFrame {
     
     public void updateAllProductPanels() {
         for (ProductPanel panel : productPanels) {
-            panel.setQuantity(0);
-            panel.updateQuantityDisplay();
+            if(panel.getQuantity() != 0)
+            {
+                panel.setQuantity(0);
+                panel.updateQuantityDisplay();
+            }
         }
     }
      
