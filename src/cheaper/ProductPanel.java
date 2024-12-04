@@ -7,6 +7,7 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Objects;
 
 public class ProductPanel extends JPanel {
 
@@ -18,8 +19,9 @@ public class ProductPanel extends JPanel {
     private JLabel quantityLabel;
     private int quantity;
     private Store store;
+    private MainFrame mainFrame;
 
-    public ProductPanel(Product product, Basket basket, Store store) {
+    public ProductPanel(Product product, Basket basket, Store store, MainFrame mainFrame) {
         this.product = product;
         // Получаем количество продуктов из корзины
         HashMap<Product, Integer> productsFromBasket = basket.getProducts();
@@ -29,6 +31,7 @@ public class ProductPanel extends JPanel {
         }
         this.quantity = quantityFromBasket;
         this.store = store;
+        this.mainFrame = mainFrame;
         
         setLayout(new BorderLayout());
 
@@ -70,7 +73,8 @@ public class ProductPanel extends JPanel {
                     );
 
                     if (result == JOptionPane.YES_OPTION) {
-                        basket.clear(); // Предположим, что у вас есть метод для очистки корзины
+                        basket.clear();
+                        mainFrame.updateAllProductPanels(); // Обновляем все панели
                     } else {
                         // Отмена действия
                         isAdd = false;
@@ -122,7 +126,15 @@ public class ProductPanel extends JPanel {
         return store;
     }
     
-    private void updateQuantityDisplay() {
+    public int getQuantity() {
+        return quantity;
+    }
+    
+    public void setQuantity(int quantity) {
+        this.quantity = quantity;
+    }
+    
+    public void updateQuantityDisplay() {
         quantityLabel.setText("Кол-во: " + quantity);
     }
 }

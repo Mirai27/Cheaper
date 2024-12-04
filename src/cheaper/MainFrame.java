@@ -17,6 +17,7 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -35,10 +36,7 @@ import javax.swing.JTabbedPane;
  * @author Mirai
  */
 public class MainFrame extends javax.swing.JFrame {
-
-    /**
-     * Creates new form MainFrame
-     */
+    private ArrayList<ProductPanel> productPanels = new ArrayList<>();
     
     public MainFrame() {
     }
@@ -167,30 +165,28 @@ public class MainFrame extends javax.swing.JFrame {
             jPanel3.add(button);
         }
         
-        
-        
-        
         pack();
         setExtendedState(JFrame.MAXIMIZED_BOTH); 
         setVisible(true);
         
     }
     
-    private static void copyPanelContents(JPanel source, JPanel target, Basket basket) {
+    private void copyPanelContents(JPanel source, JPanel target, Basket basket) {
         target.removeAll(); // Очистка целевой панели
 
         for (Component comp : source.getComponents()) {
             if (comp instanceof ProductPanel) {
                 ProductPanel originalPanel = (ProductPanel) comp;
                 // Предполагая, что существует метод для клонирования или копирования ProductPanel
-                ProductPanel newPanel = new ProductPanel(originalPanel.getProduct(), basket, originalPanel.getStore());
+                ProductPanel newPanel = new ProductPanel(originalPanel.getProduct(), basket, originalPanel.getStore(), this);
                 target.add(newPanel);
+                productPanels.add(newPanel);
             }
         }
 
         target.revalidate(); // Обновление компоновки
         target.repaint();    // Перерисовка интерфейса
-}
+    }
 
     
      private JPanel createProductPanel(Store store, Basket basket) {
@@ -200,23 +196,28 @@ public class MainFrame extends javax.swing.JFrame {
         HashMap<String, ArrayList<Product>> products = store.getProducts();
         for (ArrayList<Product> items : products.values()) {
             for (Product product : items) {
-                panel.add(new ProductPanel(product, basket, store));
+                ProductPanel productPanel = new ProductPanel(product, basket, store, this);
+                panel.add(productPanel);
+                productPanels.add(productPanel);
             }
         }
-   
+        
         return panel;
+    }
+    
+    public void updateAllProductPanels() {
+        for (ProductPanel panel : productPanels) {
+            panel.setQuantity(0);
+            panel.updateQuantityDisplay();
+        }
     }
      
     private void updateGridLayout(JPanel panel) {
         // Получите ширину экрана
         int width = getWidth();
 
-
         // Ширина одной ячейки
-        
         int cellHorizontal = (width / 250);
-
-
 
         // Установите раскладку с динамическим количеством столбцов
         panel.setLayout(new GridLayout(0, cellHorizontal));
