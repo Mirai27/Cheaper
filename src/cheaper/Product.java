@@ -4,6 +4,8 @@
  */
 package cheaper;
 
+import java.util.Objects;
+
 /**
  *
  * @author Mirai
@@ -94,5 +96,4 @@ public class Product {
     public void setExpiry_date(String expiry_date) {
         this.expiry_date = expiry_date;
     }
-    
 }
