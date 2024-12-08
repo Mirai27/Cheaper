@@ -19,8 +19,9 @@ public class Product {
     int total_quantity;
     String manufacture_date;
     String expiry_date;
+    String image_url;
 
-    public Product(int id, String name, String category, double price, double weight, int total_quantity, String manufacture_date, String expiry_date) {
+    public Product(int id, String name, String category, double price, double weight, int total_quantity, String manufacture_date, String expiry_date, String image_url) {
         this.id = id;
         this.name = name;
         this.category = category;
@@ -29,9 +30,8 @@ public class Product {
         this.total_quantity = total_quantity;
         this.manufacture_date = manufacture_date;
         this.expiry_date = expiry_date;
+        this.image_url = image_url;
     }
-    
-    
     
     public int getId() {
         return id;
@@ -95,5 +95,13 @@ public class Product {
 
     public void setExpiry_date(String expiry_date) {
         this.expiry_date = expiry_date;
+    }
+    
+    public String getImage_url() {
+        return image_url;
+    }
+
+    public void setImage_url(String image_url) {
+        this.image_url = image_url;
     }
 }

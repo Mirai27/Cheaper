@@ -56,8 +56,9 @@ public class Cheaper {
                     int total_quantity = resultSet.getInt("total_quantity");
                     String manufacture_date = resultSet.getString("manufacture_date");
                     String expiry_date = resultSet.getString("expiry_date");
+                    String image_url = resultSet.getString("image_url");
 
-                    Product product = new Product(id, name, category, price, weight, total_quantity, manufacture_date, expiry_date);
+                    Product product = new Product(id, name, category, price, weight, total_quantity, manufacture_date, expiry_date, image_url);
                     // Добавляем Продукт в Хешмап по его категории
                     // Получаем список продуктов для данной категории
                     ArrayList<Product> productsList = products.get(category);
