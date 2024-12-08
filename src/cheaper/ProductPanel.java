@@ -14,9 +14,11 @@ public class ProductPanel extends JPanel {
     private Product product;
     private JLabel nameLabel;
     private JLabel imageLabel;
+    private JLabel weightLabel;
     private JButton increaseButton;
     private JButton decreaseButton;
     private JLabel quantityLabel;
+    private JLabel leftQuantityLabel;
     private int quantity;
     private Store store;
     private MainFrame mainFrame;
@@ -37,12 +39,21 @@ public class ProductPanel extends JPanel {
 
         // Создание компонентов
         nameLabel = new JLabel(product.getName());
-        //ImageIcon icon = new ImageIcon(product.getImagePath());
-        //imageLabel = new JLabel(icon);
+        weightLabel = new JLabel("Вес: " + product.getWeight() + "г.");
+        
+        // Загрузка изображения и создание JLabel для него
+        ImageIcon originalIcon = new ImageIcon("images/" + product.getImage_url());
+        Image originalImage = originalIcon.getImage();
+        Image scaledImage = originalImage.getScaledInstance(120, 100, Image.SCALE_SMOOTH);
+        ImageIcon scaledIcon = new ImageIcon(scaledImage);
+        imageLabel = new JLabel(scaledIcon);
+        imageLabel.setHorizontalAlignment(SwingConstants.CENTER);
         
         increaseButton = new JButton("+");
         decreaseButton = new JButton("-");
         quantityLabel = new JLabel("Кол-во: " + quantity);
+        int leftQuantity = product.getTotal_quantity() - quantity;
+        leftQuantityLabel = new JLabel("Осталось: " + leftQuantity);
 
         // Панель для кнопок
         JPanel buttonPanel = new JPanel();
@@ -104,14 +115,42 @@ public class ProductPanel extends JPanel {
             }
         });
      
+        // Панель для Названия и веса
+        JPanel infoPanel = new JPanel();
+        infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.Y_AXIS));
+        infoPanel.add(nameLabel);
+        infoPanel.add(weightLabel);
+        
+        // Панель для количества
+        JPanel quantityPanel = new JPanel();
+        quantityPanel.setLayout(new BoxLayout(quantityPanel, BoxLayout.Y_AXIS));
+        quantityPanel.add(quantityLabel);
+        quantityPanel.add(leftQuantityLabel);
+       
         // Организация компонентов на панели
-        add(nameLabel, BorderLayout.NORTH);
-        //add(imageLabel, BorderLayout.CENTER);
+        add(infoPanel, BorderLayout.NORTH); 
+        add(imageLabel, BorderLayout.CENTER); // Добавляем JLabel с изображением
         add(buttonPanel, BorderLayout.SOUTH);
-        add(quantityLabel, BorderLayout.EAST);
+        add(quantityPanel, BorderLayout.EAST);
         
         setPreferredSize(new Dimension(150, 200));
         setBorder(BorderFactory.createLineBorder(Color.BLACK)); // Опционально
+        
+        // Установка белого фона
+        setBackground(Color.WHITE);
+        setOpaque(true);
+        
+        // Установка фона для панели кнопок
+        buttonPanel.setBackground(Color.WHITE);
+        buttonPanel.setOpaque(true);
+        
+        // Установка фона для информационной панели
+        infoPanel.setBackground(Color.WHITE);
+        infoPanel.setOpaque(true);
+        
+         // Установка фона для панели количества
+        quantityPanel.setBackground(Color.WHITE);
+        quantityPanel.setOpaque(true);
     }
 
     public Product getProduct() {
@@ -136,5 +175,7 @@ public class ProductPanel extends JPanel {
     
     public void updateQuantityDisplay() {
         quantityLabel.setText("Кол-во: " + quantity);
+        int leftQuantity = product.getTotal_quantity() - quantity;
+        leftQuantityLabel.setText("Осталось: " + leftQuantity);
     }
 }
