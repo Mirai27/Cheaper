@@ -17,6 +17,7 @@ public class ProductPanel extends JPanel {
     private JLabel weightLabel;
     private JButton increaseButton;
     private JButton decreaseButton;
+    private JLabel priceLabel;
     private JLabel quantityLabel;
     private JLabel leftQuantityLabel;
     private int quantity;
@@ -39,7 +40,7 @@ public class ProductPanel extends JPanel {
 
         // Создание компонентов
         nameLabel = new JLabel(product.getName());
-        weightLabel = new JLabel("Вес: " + product.getWeight() + "г.");
+        weightLabel = new JLabel("Вес: " + product.getWeight() + "кг.");
         
         // Загрузка изображения и создание JLabel для него
         ImageIcon originalIcon = new ImageIcon("images/" + product.getImage_url());
@@ -54,12 +55,19 @@ public class ProductPanel extends JPanel {
         quantityLabel = new JLabel("Кол-во: " + quantity);
         int leftQuantity = product.getTotal_quantity() - quantity;
         leftQuantityLabel = new JLabel("Осталось: " + leftQuantity);
+        priceLabel = new JLabel("Цена: " + product.getPrice() + " руб.");
 
-        // Панель для кнопок
         JPanel buttonPanel = new JPanel();
-        buttonPanel.setLayout(new FlowLayout());
-        buttonPanel.add(decreaseButton);
-        buttonPanel.add(increaseButton);
+        buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.Y_AXIS));
+        buttonPanel.add(priceLabel);
+        
+        // Панель для кнопок с горизонтальной компоновкой
+        JPanel buttonsContainer = new JPanel(new FlowLayout());
+        buttonsContainer.setBackground(Color.WHITE);
+        buttonsContainer.add(decreaseButton);
+        buttonsContainer.add(increaseButton);
+        
+        buttonPanel.add(buttonsContainer);      
 
         // Добавление слушателей
         increaseButton.addActionListener((ActionEvent e) -> {
@@ -90,6 +98,10 @@ public class ProductPanel extends JPanel {
                         // Отмена действия
                         isAdd = false;
                     }
+                }
+                if (basket.getTotalWeight() + product.getWeight() > 20){
+                    isAdd = false;
+                    JOptionPane.showMessageDialog(this, "Вы достигли максимального веса в корзине", "Предупреждение", JOptionPane.WARNING_MESSAGE);
                 }
             }
             if (isAdd){
