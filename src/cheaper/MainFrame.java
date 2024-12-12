@@ -15,6 +15,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -22,6 +23,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
@@ -37,15 +40,26 @@ import javax.swing.JTabbedPane;
  */
 public class MainFrame extends javax.swing.JFrame {
     private ArrayList<ProductPanel> productPanels = new ArrayList<>();
-    
+    private BasketWindow basketWindow;
     public MainFrame() {
     }
 
     public MainFrame(ArrayList<Store> stores, Basket basket) {
         initComponents();
+        
         setTitle("Cheaper");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
+        // Пример добавления обработчика события на кнопку корзины
+            jButton1.addActionListener(e -> {
+                if (basketWindow != null) {
+                    basketWindow.dispose();
+                }
+            try {
+                basketWindow = new BasketWindow(basket, stores);
+            } catch (SQLException ex) {
+                Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            });
         JTabbedPane tabbedPane = new JTabbedPane();
         // Создание панелей с продуктами
         JPanel storePanel0 = createProductPanel(stores.get(0), basket);

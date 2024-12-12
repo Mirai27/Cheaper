@@ -4,7 +4,9 @@
  */
 package cheaper;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -15,7 +17,25 @@ class Basket {
     // Словарь: ключ - Продукт, значение - его Количество 
     private HashMap<Product, Integer> products = new HashMap<>();
     private double totalWeight = 0.0;
+    private List<BasketListener> listeners = new ArrayList<>();
 
+    // Добавление слушателя
+    public void addBasketListener(BasketListener listener) {
+        listeners.add(listener);
+    }
+
+    // Удаление слушателя
+    public void removeBasketListener(BasketListener listener) {
+        listeners.remove(listener);
+    }
+
+    // Уведомление всех слушателей
+    private void notifyListeners() {
+        for (BasketListener listener : listeners) {
+            listener.basketChanged();
+        }
+    }
+    
     public Basket(HashMap<Product, Integer> products){
         this.products = products;
         double totalW = 0.0;
@@ -36,6 +56,7 @@ class Basket {
     
     public void setProducts(HashMap<Product, Integer> products){
         this.products = products;
+        notifyListeners(); // Уведомляем слушателей об изменении корзины
     }
     
     public double getTotalWeight(){
@@ -44,6 +65,7 @@ class Basket {
     
     public void setTotalWeight(double totalWeight){
         this.totalWeight = totalWeight;
+        notifyListeners(); // Уведомляем слушателей об изменении корзины
     }
             
     
@@ -53,6 +75,7 @@ class Basket {
         // Если Товар есть в корзине, Увеличиваем его количество на 1
         products.compute(product, (k, v) -> v == null ? 1 : v + 1);
         this.totalWeight += product.getWeight();
+        notifyListeners(); // Уведомляем слушателей об изменении корзины
     }
     
     // Функция убирает товар из корзины
@@ -62,6 +85,7 @@ class Basket {
         // Если Товара нет в корзине ничего не делаем
         products.computeIfPresent(product, (k, v) -> v > 1 ? v - 1 : null);
         this.totalWeight -= product.getWeight();
+        notifyListeners(); // Уведомляем слушателей об изменении корзины
     }
     
     public boolean isEmpty(){
@@ -71,5 +95,6 @@ class Basket {
      public void clear(){
         products.clear();
         totalWeight = 0.0;
+        notifyListeners(); // Уведомляем слушателей об изменении корзины
     }
 }
