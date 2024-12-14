@@ -21,6 +21,7 @@ import java.util.Comparator;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.border.Border;
 
 public class BasketWindow extends JFrame implements BasketListener {
     private Basket basket;
@@ -42,11 +43,20 @@ public class BasketWindow extends JFrame implements BasketListener {
         tabbedPane = new JTabbedPane();
         summaryPanel = new JPanel(new GridLayout(3, 1));
 
+        // Создаем панели с прокруткой для каждой вкладки
+        JScrollPane ptrchkaScroll = new JScrollPane(createScrollablePanel());
+        JScrollPane dixyScroll = new JScrollPane(createScrollablePanel());
+        JScrollPane lentaScroll = new JScrollPane(createScrollablePanel());
+        JScrollPane cheaperScroll = new JScrollPane(createScrollablePanel());
+        ptrchkaScroll.getVerticalScrollBar().setUnitIncrement(16);
+        dixyScroll.getVerticalScrollBar().setUnitIncrement(16);
+        lentaScroll.getVerticalScrollBar().setUnitIncrement(16);
+        cheaperScroll.getVerticalScrollBar().setUnitIncrement(16);
         // Создаем вкладки в JTabbedPane
-        tabbedPane.addTab("Пятерочка", new JPanel());
-        tabbedPane.addTab("Дикси", new JPanel());
-        tabbedPane.addTab("Лента", new JPanel());
-        tabbedPane.addTab("Дешевле!", new JPanel());
+        tabbedPane.addTab("Пятерочка", ptrchkaScroll);
+        tabbedPane.addTab("Дикси", dixyScroll);
+        tabbedPane.addTab("Лента", lentaScroll);
+        tabbedPane.addTab("Дешевле!", cheaperScroll);
 
         updateBasketDisplay();
 
@@ -55,10 +65,17 @@ public class BasketWindow extends JFrame implements BasketListener {
         setVisible(true);
     }
 
+    private JPanel createScrollablePanel() {
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS)); // Используем BoxLayout для вертикального размещения
+        return panel;
+    }
+
     private void updateBasketDisplay() throws SQLException {
         // Очистка перед обновлением
         for (int i = 0; i < tabbedPane.getTabCount(); i++) {
-            JPanel panel = (JPanel) tabbedPane.getComponentAt(i);
+            JScrollPane scrollPane = (JScrollPane) tabbedPane.getComponentAt(i);
+            JPanel panel = (JPanel) scrollPane.getViewport().getView();
             panel.removeAll();
         }
         summaryPanel.removeAll();
@@ -79,105 +96,140 @@ public class BasketWindow extends JFrame implements BasketListener {
                 flag = false;
             }
         }
-        if ((storename != null) & !storename.isEmpty() ) {
+        if ((storename != null) && !storename.isEmpty()) {
             storename_shown = switch (storename) {
                 case "ptrchka" -> "Пятерочка";
                 case "dixy" -> "Дикси";
                 case "lenta" -> "Лента";
                 default -> "";
             };
-        }
-        else {
+        } else {
             storename_shown = "";
         }
+
         // Заполняем соответствующую вкладку
-        if (!storename_shown.isEmpty() & !storename.isEmpty() & (storename != null) & (storename_shown != null) ) {
-            JPanel ptrchkaPanel = (JPanel) tabbedPane.getComponentAt(tabbedPane.indexOfTab("Пятерочка"));
-            JPanel cheaperPanel = (JPanel) tabbedPane.getComponentAt(tabbedPane.indexOfTab("Дешевле!"));
-            JPanel dixyPanel = (JPanel) tabbedPane.getComponentAt(tabbedPane.indexOfTab("Дикси"));
-            JPanel lentaPanel = (JPanel) tabbedPane.getComponentAt(tabbedPane.indexOfTab("Лента"));
+        if (!storename_shown.isEmpty() && !storename.isEmpty() && (storename != null) && (storename_shown != null)) {
+            JPanel ptrchkaPanel = (JPanel) ((JScrollPane) tabbedPane.getComponentAt(tabbedPane.indexOfTab("Пятерочка"))).getViewport().getView();
+            JPanel dixyPanel = (JPanel) ((JScrollPane) tabbedPane.getComponentAt(tabbedPane.indexOfTab("Дикси"))).getViewport().getView();
+            JPanel lentaPanel = (JPanel) ((JScrollPane) tabbedPane.getComponentAt(tabbedPane.indexOfTab("Лента"))).getViewport().getView();
+            JPanel cheaperPanel = (JPanel) ((JScrollPane) tabbedPane.getComponentAt(tabbedPane.indexOfTab("Дешевле!"))).getViewport().getView();
+
+            // Создаем объект для отступов
+            Border labelBorder = BorderFactory.createEmptyBorder(5, 0, 5, 0);
+
             for (Map.Entry<Product, Integer> entry : productsMap.entrySet()) {
                 Product product = entry.getKey();
                 int quantity = entry.getValue();
-                // Получаем список аналогичных продуктов из БД по ID продукта
-                
+
                 if ("Пятерочка".equals(storename_shown)) {
-                    ptrchkaPanel.add(new JLabel(product.getName() + " - Цена: " + product.getPrice() + ", Вес: " + product.getWeight() + ", Кол-во: " + quantity));
-                    
+                    ptrchkaPanel.add(new JLabel(product.getName() + " - Цена: " + product.getPrice() + ", Вес: " + product.getWeight() + ", Кол-во: " + quantity) {{
+                        setBorder(labelBorder);
+                    }});
+
                     Product similarProduct = queryDatabaseForSimilarProducts(product, storename, "dixy");
-                    if (similarProduct != null)
-                        dixyPanel.add(new JLabel(similarProduct.getName() + " - Цена: " + similarProduct.getPrice() + ", Вес: " + similarProduct.getWeight() + ", Кол-во: " + quantity));
-                    else {
-                        JLabel label = new JLabel(product.getName() + " - Цена: " + product.getPrice() + ", Вес: " + product.getWeight() + ", Кол-во: " + quantity);
-                        label.setForeground(Color.RED); // Устанавливаем цвет текста в красный
-                        dixyPanel.add(label);
-                    } 
+                    if (similarProduct != null) {
+                        dixyPanel.add(new JLabel(similarProduct.getName() + " - Цена: " + similarProduct.getPrice() + ", Вес: " + similarProduct.getWeight() + ", Кол-во: " + quantity) {{
+                            setBorder(labelBorder);
+                        }});
+                    } else {
+                        dixyPanel.add(new JLabel(product.getName() + " - Цена: " + product.getPrice() + ", Вес: " + product.getWeight() + ", Кол-во: " + quantity) {{
+                            setForeground(Color.RED);
+                            setBorder(labelBorder);
+                        }});
+                    }
+
                     similarProduct = queryDatabaseForSimilarProducts(product, storename, "lenta");
-                    if (similarProduct != null)
-                        lentaPanel.add(new JLabel(similarProduct.getName() + " - Цена: " + similarProduct.getPrice() + ", Вес: " + similarProduct.getWeight() + ", Кол-во: " + quantity));
-                    else {
-                        JLabel label = new JLabel(product.getName() + " - Цена: " + product.getPrice() + ", Вес: " + product.getWeight() + ", Кол-во: " + quantity);
-                        label.setForeground(Color.RED); // Устанавливаем цвет текста в красный
-                        lentaPanel.add(label);
-                    } 
+                    if (similarProduct != null) {
+                        lentaPanel.add(new JLabel(similarProduct.getName() + " - Цена: " + similarProduct.getPrice() + ", Вес: " + similarProduct.getWeight() + ", Кол-во: " + quantity) {{
+                            setBorder(labelBorder);
+                        }});
+                    } else {
+                        lentaPanel.add(new JLabel(product.getName() + " - Цена: " + product.getPrice() + ", Вес: " + product.getWeight() + ", Кол-во: " + quantity) {{
+                            setForeground(Color.RED);
+                            setBorder(labelBorder);
+                        }});
+                    }
                 }
+
                 if ("Дикси".equals(storename_shown)) {
-                    dixyPanel.add(new JLabel(product.getName() + " - Цена: " + product.getPrice() + ", Вес: " + product.getWeight() + ", Кол-во: " + quantity));
-                    
+                    dixyPanel.add(new JLabel(product.getName() + " - Цена: " + product.getPrice() + ", Вес: " + product.getWeight() + ", Кол-во: " + quantity) {{
+                        setBorder(labelBorder);
+                    }});
+
                     Product similarProduct = queryDatabaseForSimilarProducts(product, storename, "ptrchka");
-                    if (similarProduct != null)
-                        ptrchkaPanel.add(new JLabel(similarProduct.getName() + " - Цена: " + similarProduct.getPrice() + ", Вес: " + similarProduct.getWeight() + ", Кол-во: " + quantity));
-                    else {
-                        JLabel label = new JLabel(product.getName() + " - Цена: " + product.getPrice() + ", Вес: " + product.getWeight() + ", Кол-во: " + quantity);
-                        label.setForeground(Color.RED); // Устанавливаем цвет текста в красный
-                        ptrchkaPanel.add(label);
-                    } 
+                    if (similarProduct != null) {
+                        ptrchkaPanel.add(new JLabel(similarProduct.getName() + " - Цена: " + similarProduct.getPrice() + ", Вес: " + similarProduct.getWeight() + ", Кол-во: " + quantity) {{
+                            setBorder(labelBorder);
+                        }});
+                    } else {
+                        ptrchkaPanel.add(new JLabel(product.getName() + " - Цена: " + product.getPrice() + ", Вес: " + product.getWeight() + ", Кол-во: " + quantity) {{
+                            setForeground(Color.RED);
+                            setBorder(labelBorder);
+                        }});
+                    }
+
                     similarProduct = queryDatabaseForSimilarProducts(product, storename, "lenta");
-                    if (similarProduct != null)   
-                        lentaPanel.add(new JLabel(similarProduct.getName() + " - Цена: " + similarProduct.getPrice() + ", Вес: " + similarProduct.getWeight() + ", Кол-во: " + quantity));
-                    else {
-                        JLabel label = new JLabel(product.getName() + " - Цена: " + product.getPrice() + ", Вес: " + product.getWeight() + ", Кол-во: " + quantity);
-                        label.setForeground(Color.RED); // Устанавливаем цвет текста в красный
-                        lentaPanel.add(label);
-                    } 
+                    if (similarProduct != null) {
+                        lentaPanel.add(new JLabel(similarProduct.getName() + " - Цена: " + similarProduct.getPrice() + ", Вес: " + similarProduct.getWeight() + ", Кол-во: " + quantity) {{
+                            setBorder(labelBorder);
+                        }});
+                    } else {
+                        lentaPanel.add(new JLabel(product.getName() + " - Цена: " + product.getPrice() + ", Вес: " + product.getWeight() + ", Кол-во: " + quantity) {{
+                            setForeground(Color.RED);
+                            setBorder(labelBorder);
+                        }});
+                    }
                 }
+
                 if ("Лента".equals(storename_shown)) {
-                    lentaPanel.add(new JLabel(product.getName() + " - Цена: " + product.getPrice() + ", Вес: " + product.getWeight() + ", Кол-во: " + quantity));
-                    
+                    lentaPanel.add(new JLabel(product.getName() + " - Цена: " + product.getPrice() + ", Вес: " + product.getWeight() + ", Кол-во: " + quantity) {{
+                        setBorder(labelBorder);
+                    }});
+
                     Product similarProduct = queryDatabaseForSimilarProducts(product, storename, "dixy");
-                    if (similarProduct != null)
-                        dixyPanel.add(new JLabel(similarProduct.getName() + " - Цена: " + similarProduct.getPrice() + ", Вес: " + similarProduct.getWeight() + ", Кол-во: " + quantity));
-                    else {
-                        JLabel label = new JLabel(product.getName() + " - Цена: " + product.getPrice() + ", Вес: " + product.getWeight() + ", Кол-во: " + quantity);
-                        label.setForeground(Color.RED); // Устанавливаем цвет текста в красный'
-                        dixyPanel.add(label);
-                    } 
+                    if (similarProduct != null) {
+                        dixyPanel.add(new JLabel(similarProduct.getName() + " - Цена: " + similarProduct.getPrice() + ", Вес: " + similarProduct.getWeight() + ", Кол-во: " + quantity) {{
+                            setBorder(labelBorder);
+                        }});
+                    } else {
+                        dixyPanel.add(new JLabel(product.getName() + " - Цена: " + product.getPrice() + ", Вес: " + product.getWeight() + ", Кол-во: " + quantity) {{
+                            setForeground(Color.RED);
+                            setBorder(labelBorder);
+                        }});
+                    }
+
                     similarProduct = queryDatabaseForSimilarProducts(product, storename, "ptrchka");
-                    if (similarProduct != null)
-                        ptrchkaPanel.add(new JLabel(similarProduct.getName() + " - Цена: " + similarProduct.getPrice() + ", Вес: " + similarProduct.getWeight() + ", Кол-во: " + quantity));
-                    else {
-                            JLabel label = new JLabel(product.getName() + " - Цена: " + product.getPrice() + ", Вес: " + product.getWeight() + ", Кол-во: " + quantity);
-                            label.setForeground(Color.RED); // Устанавливаем цвет текста в красный
-                            ptrchkaPanel.add(label);
-                        } 
+                    if (similarProduct != null) {
+                        ptrchkaPanel.add(new JLabel(similarProduct.getName() + " - Цена: " + similarProduct.getPrice() + ", Вес: " + similarProduct.getWeight() + ", Кол-во: " + quantity) {{
+                            setBorder(labelBorder);
+                        }});
+                    } else {
+                        ptrchkaPanel.add(new JLabel(product.getName() + " - Цена: " + product.getPrice() + ", Вес: " + product.getWeight() + ", Кол-во: " + quantity) {{
+                            setForeground(Color.RED);
+                            setBorder(labelBorder);
+                        }});
+                    }
                 }
+
                 Product similarProduct = queryDatabaseForSimilarProducts(product, storename, storename);
-                cheaperPanel.add(new JLabel(similarProduct.getName() + " - Цена: " + similarProduct.getPrice() + ", Вес: " + similarProduct.getWeight() + ", Кол-во: " + quantity));
+                cheaperPanel.add(new JLabel(similarProduct.getName() + " - Цена: " + similarProduct.getPrice() + ", Вес: " + similarProduct.getWeight() + ", Кол-во: " + quantity) {{
+                    setBorder(labelBorder);
+                }});
             }
         }
-        
-
-       
         
         summaryPanel.add(new JLabel(String.format("Общая стоимость: %.2f", calculateTotalPrice(productsMap))));
         summaryPanel.add(new JLabel(String.format("Общий вес: %.2f", basket.getTotalWeight())));
         summaryPanel.add(new JLabel("Ваша корзина собрана в магазине: " + storename_shown));
-
+        
         // Обновление интерфейса
         for (int i = 0; i < tabbedPane.getTabCount(); i++) {
-            tabbedPane.getComponentAt(i).revalidate();
-            tabbedPane.getComponentAt(i).repaint();
+            JScrollPane scrollPane = (JScrollPane) tabbedPane.getComponentAt(i);
+            JPanel panel = (JPanel) scrollPane.getViewport().getView();
+            panel.revalidate();
+            panel.repaint();
         }
+
         summaryPanel.revalidate();
         summaryPanel.repaint();
     }
