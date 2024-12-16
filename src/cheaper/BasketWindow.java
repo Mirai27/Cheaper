@@ -134,13 +134,10 @@ public class BasketWindow extends JFrame implements BasketListener {
 
                     Product similarProduct = queryDatabaseForSimilarProducts(product, storename, "dixy");
                     if (similarProduct != null) {
+                        
                         for (int i = 0; i < quantity; i++){
                             dixyBasket.addProduct(similarProduct);
                         }
-                        
-                        dixyPanel.add(new JLabel(similarProduct.getName() + " - Цена: " + similarProduct.getPrice() + ", Вес: " + similarProduct.getWeight() + ", Кол-во: " + quantity) {{
-                            setBorder(labelBorder);
-                        }});
                     } else {
                         dixyPanel.add(new JLabel(product.getName() + " - Цена: " + product.getPrice() + ", Вес: " + product.getWeight() + ", Кол-во: " + quantity) {{
                             setForeground(Color.RED);
@@ -150,13 +147,10 @@ public class BasketWindow extends JFrame implements BasketListener {
 
                     similarProduct = queryDatabaseForSimilarProducts(product, storename, "lenta");
                     if (similarProduct != null) {
+                        
                         for (int i = 0; i < quantity; i++){
                             lentaBasket.addProduct(similarProduct);
                         }
-                        
-                        lentaPanel.add(new JLabel(similarProduct.getName() + " - Цена: " + similarProduct.getPrice() + ", Вес: " + similarProduct.getWeight() + ", Кол-во: " + quantity) {{
-                            setBorder(labelBorder);
-                        }});
                     } else {
                         lentaPanel.add(new JLabel(product.getName() + " - Цена: " + product.getPrice() + ", Вес: " + product.getWeight() + ", Кол-во: " + quantity) {{
                             setForeground(Color.RED);
@@ -175,10 +169,6 @@ public class BasketWindow extends JFrame implements BasketListener {
                         for (int i = 0; i < quantity; i++){
                             ptrchkaBasket.addProduct(similarProduct);
                         }
-                        
-                        ptrchkaPanel.add(new JLabel(similarProduct.getName() + " - Цена: " + similarProduct.getPrice() + ", Вес: " + similarProduct.getWeight() + ", Кол-во: " + quantity) {{
-                            setBorder(labelBorder);
-                        }});
                     } else {
                         ptrchkaPanel.add(new JLabel(product.getName() + " - Цена: " + product.getPrice() + ", Вес: " + product.getWeight() + ", Кол-во: " + quantity) {{
                             setForeground(Color.RED);
@@ -191,10 +181,6 @@ public class BasketWindow extends JFrame implements BasketListener {
                         for (int i = 0; i < quantity; i++){
                             lentaBasket.addProduct(similarProduct);
                         }
-                        
-                        lentaPanel.add(new JLabel(similarProduct.getName() + " - Цена: " + similarProduct.getPrice() + ", Вес: " + similarProduct.getWeight() + ", Кол-во: " + quantity) {{
-                            setBorder(labelBorder);
-                        }});
                     } else {
                         lentaPanel.add(new JLabel(product.getName() + " - Цена: " + product.getPrice() + ", Вес: " + product.getWeight() + ", Кол-во: " + quantity) {{
                             setForeground(Color.RED);
@@ -213,10 +199,6 @@ public class BasketWindow extends JFrame implements BasketListener {
                         for (int i = 0; i < quantity; i++){
                             dixyBasket.addProduct(similarProduct);
                         }
-                        
-                        dixyPanel.add(new JLabel(similarProduct.getName() + " - Цена: " + similarProduct.getPrice() + ", Вес: " + similarProduct.getWeight() + ", Кол-во: " + quantity) {{
-                            setBorder(labelBorder);
-                        }});
                     } else {
                         dixyPanel.add(new JLabel(product.getName() + " - Цена: " + product.getPrice() + ", Вес: " + product.getWeight() + ", Кол-во: " + quantity) {{
                             setForeground(Color.RED);
@@ -229,10 +211,6 @@ public class BasketWindow extends JFrame implements BasketListener {
                         for (int i = 0; i < quantity; i++){
                             ptrchkaBasket.addProduct(similarProduct);
                         }
-                        
-                        ptrchkaPanel.add(new JLabel(similarProduct.getName() + " - Цена: " + similarProduct.getPrice() + ", Вес: " + similarProduct.getWeight() + ", Кол-во: " + quantity) {{
-                            setBorder(labelBorder);
-                        }});
                     } else {
                         ptrchkaPanel.add(new JLabel(product.getName() + " - Цена: " + product.getPrice() + ", Вес: " + product.getWeight() + ", Кол-во: " + quantity) {{
                             setForeground(Color.RED);
@@ -245,8 +223,37 @@ public class BasketWindow extends JFrame implements BasketListener {
                 for (int i = 0; i < quantity; i++){
                     cheaperBasket.addProduct(similarProduct);
                 }
-                
-                cheaperPanel.add(new JLabel(similarProduct.getName() + " - Цена: " + similarProduct.getPrice() + ", Вес: " + similarProduct.getWeight() + ", Кол-во: " + quantity) {{
+            }
+            HashMap<Product, Integer> ptrchkaProductsMap = ptrchkaBasket.getProducts();
+            HashMap<Product, Integer> dixyProductsMap = dixyBasket.getProducts();
+            HashMap<Product, Integer> lentaProductsMap = lentaBasket.getProducts();
+            HashMap<Product, Integer> cheaperProductsMap = cheaperBasket.getProducts();
+            for (Map.Entry<Product, Integer> entry : ptrchkaProductsMap.entrySet()) {
+                Product product = entry.getKey();
+                int quantity = entry.getValue();
+                System.out.println(product.getId());
+                ptrchkaPanel.add(new JLabel(product.getName() + " - Цена: " + product.getPrice() + ", Вес: " + product.getWeight() + ", Кол-во: " + quantity) {{
+                    setBorder(labelBorder);
+                }});
+            }
+            for (Map.Entry<Product, Integer> entry : dixyProductsMap.entrySet()) {
+                Product product = entry.getKey();
+                int quantity = entry.getValue();
+                dixyPanel.add(new JLabel(product.getName() + " - Цена: " + product.getPrice() + ", Вес: " + product.getWeight() + ", Кол-во: " + quantity) {{
+                    setBorder(labelBorder);
+                }});
+            }
+            for (Map.Entry<Product, Integer> entry : lentaProductsMap.entrySet()) {
+                Product product = entry.getKey();
+                int quantity = entry.getValue();
+                lentaPanel.add(new JLabel(product.getName() + " - Цена: " + product.getPrice() + ", Вес: " + product.getWeight() + ", Кол-во: " + quantity) {{
+                    setBorder(labelBorder);
+                }});
+            }
+            for (Map.Entry<Product, Integer> entry : cheaperProductsMap.entrySet()) {
+                Product product = entry.getKey();
+                int quantity = entry.getValue();
+                cheaperPanel.add(new JLabel(product.getName() + " - Цена: " + product.getPrice() + ", Вес: " + product.getWeight() + ", Кол-во: " + quantity) {{
                     setBorder(labelBorder);
                 }});
             }
@@ -364,8 +371,6 @@ public class BasketWindow extends JFrame implements BasketListener {
         return findCheapestProduct(products);
     }
 
- 
-    
     @Override
     public void basketChanged() {
         try {

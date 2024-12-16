@@ -70,13 +70,24 @@ class Basket {
             
     
     // Функция добавляет товар в корзину
-    public void addProduct(Product product){
-        // Если Товара нет в корзине, Устанавливаем новый товар в корзине
-        // Если Товар есть в корзине, Увеличиваем его количество на 1
-        products.compute(product, (k, v) -> v == null ? 1 : v + 1);
-        this.totalWeight += product.getWeight();
+    public void addProduct(Product newProduct) {
+        // Найти продукт с таким же ID в корзине
+        for (Map.Entry<Product, Integer> entry : products.entrySet()) {
+            Product existingProduct = entry.getKey();
+            if (existingProduct.getId() == newProduct.getId()) {
+                // Если нашли, обновляем количество
+                products.put(existingProduct, entry.getValue() + 1);
+                this.totalWeight += newProduct.getWeight();
+                notifyListeners(); // Уведомляем слушателей об изменении корзины
+                return;
+            }
+        }
+        // Если не нашли, добавляем новый продукт
+        products.put(newProduct, 1);
+        this.totalWeight += newProduct.getWeight();
         notifyListeners(); // Уведомляем слушателей об изменении корзины
     }
+
     
     // Функция убирает товар из корзины
     public void subtractProduct(Product product){
