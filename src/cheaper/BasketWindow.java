@@ -134,7 +134,10 @@ public class BasketWindow extends JFrame implements BasketListener {
 
                     Product similarProduct = queryDatabaseForSimilarProducts(product, storename, "dixy");
                     if (similarProduct != null) {
-                        dixyBasket.addProduct(similarProduct);
+                        for (int i = 0; i < quantity; i++){
+                            dixyBasket.addProduct(similarProduct);
+                        }
+                        
                         dixyPanel.add(new JLabel(similarProduct.getName() + " - Цена: " + similarProduct.getPrice() + ", Вес: " + similarProduct.getWeight() + ", Кол-во: " + quantity) {{
                             setBorder(labelBorder);
                         }});
@@ -147,7 +150,10 @@ public class BasketWindow extends JFrame implements BasketListener {
 
                     similarProduct = queryDatabaseForSimilarProducts(product, storename, "lenta");
                     if (similarProduct != null) {
-                        lentaBasket.addProduct(similarProduct);
+                        for (int i = 0; i < quantity; i++){
+                            lentaBasket.addProduct(similarProduct);
+                        }
+                        
                         lentaPanel.add(new JLabel(similarProduct.getName() + " - Цена: " + similarProduct.getPrice() + ", Вес: " + similarProduct.getWeight() + ", Кол-во: " + quantity) {{
                             setBorder(labelBorder);
                         }});
@@ -166,7 +172,10 @@ public class BasketWindow extends JFrame implements BasketListener {
 
                     Product similarProduct = queryDatabaseForSimilarProducts(product, storename, "ptrchka");
                     if (similarProduct != null) {
-                        ptrchkaBasket.addProduct(similarProduct);
+                        for (int i = 0; i < quantity; i++){
+                            ptrchkaBasket.addProduct(similarProduct);
+                        }
+                        
                         ptrchkaPanel.add(new JLabel(similarProduct.getName() + " - Цена: " + similarProduct.getPrice() + ", Вес: " + similarProduct.getWeight() + ", Кол-во: " + quantity) {{
                             setBorder(labelBorder);
                         }});
@@ -179,7 +188,10 @@ public class BasketWindow extends JFrame implements BasketListener {
 
                     similarProduct = queryDatabaseForSimilarProducts(product, storename, "lenta");
                     if (similarProduct != null) {
-                        lentaBasket.addProduct(similarProduct);
+                        for (int i = 0; i < quantity; i++){
+                            lentaBasket.addProduct(similarProduct);
+                        }
+                        
                         lentaPanel.add(new JLabel(similarProduct.getName() + " - Цена: " + similarProduct.getPrice() + ", Вес: " + similarProduct.getWeight() + ", Кол-во: " + quantity) {{
                             setBorder(labelBorder);
                         }});
@@ -198,7 +210,10 @@ public class BasketWindow extends JFrame implements BasketListener {
 
                     Product similarProduct = queryDatabaseForSimilarProducts(product, storename, "dixy");
                     if (similarProduct != null) {
-                        dixyBasket.addProduct(similarProduct);
+                        for (int i = 0; i < quantity; i++){
+                            dixyBasket.addProduct(similarProduct);
+                        }
+                        
                         dixyPanel.add(new JLabel(similarProduct.getName() + " - Цена: " + similarProduct.getPrice() + ", Вес: " + similarProduct.getWeight() + ", Кол-во: " + quantity) {{
                             setBorder(labelBorder);
                         }});
@@ -211,7 +226,10 @@ public class BasketWindow extends JFrame implements BasketListener {
 
                     similarProduct = queryDatabaseForSimilarProducts(product, storename, "ptrchka");
                     if (similarProduct != null) {
-                        ptrchkaBasket.addProduct(similarProduct);
+                        for (int i = 0; i < quantity; i++){
+                            ptrchkaBasket.addProduct(similarProduct);
+                        }
+                        
                         ptrchkaPanel.add(new JLabel(similarProduct.getName() + " - Цена: " + similarProduct.getPrice() + ", Вес: " + similarProduct.getWeight() + ", Кол-во: " + quantity) {{
                             setBorder(labelBorder);
                         }});
@@ -224,7 +242,10 @@ public class BasketWindow extends JFrame implements BasketListener {
                 }
 
                 Product similarProduct = queryDatabaseForSimilarProducts(product, storename, storename);
-                cheaperBasket.addProduct(similarProduct);
+                for (int i = 0; i < quantity; i++){
+                    cheaperBasket.addProduct(similarProduct);
+                }
+                
                 cheaperPanel.add(new JLabel(similarProduct.getName() + " - Цена: " + similarProduct.getPrice() + ", Вес: " + similarProduct.getWeight() + ", Кол-во: " + quantity) {{
                     setBorder(labelBorder);
                 }});
@@ -246,28 +267,28 @@ public class BasketWindow extends JFrame implements BasketListener {
         if ("Пятерочка".equals(storename_shown)) {
             s1 += "\n" + formatWithDots("Стоимость в Дикси:", dixyBasket.calculateTotalPrice(), nameWidth, priceWidth);
             s1 += "\n" + formatWithDots("Стоимость в Ленте:", lentaBasket.calculateTotalPrice(), nameWidth, priceWidth);
-            s1 += "\n" + formatWithDots("Мин. стоимость в Пятёрочке:", basket.calculateTotalPrice(), nameWidth, priceWidth);
+            s1 += "\n" + formatWithDots("Мин. стоимость в Пятёрочке:", cheaperBasket.calculateTotalPrice(), nameWidth, priceWidth);
             s2 += "\n" + formatWithDots("Вес в Дикси:", dixyBasket.getTotalWeight(), nameWidth, priceWidth);
             s2 += "\n" + formatWithDots("Вес в Ленте:", lentaBasket.getTotalWeight(), nameWidth, priceWidth);
-            s2 += "\n" + formatWithDots("Мин. вес в Пятёрочке:", basket.getTotalWeight(), nameWidth, priceWidth);
+            s2 += "\n" + formatWithDots("Мин. вес в Пятёрочке:", cheaperBasket.getTotalWeight(), nameWidth, priceWidth);
         }
 
         if ("Дикси".equals(storename_shown)) {
             s1 += "\n" + formatWithDots("Стоимость в Пятёрочке:", ptrchkaBasket.calculateTotalPrice(), nameWidth, priceWidth);
             s1 += "\n" + formatWithDots("Стоимость в Ленте:", lentaBasket.calculateTotalPrice(), nameWidth, priceWidth);
-            s1 += "\n" + formatWithDots("Мин. стоимость в Дикси:", basket.calculateTotalPrice(), nameWidth, priceWidth);
+            s1 += "\n" + formatWithDots("Мин. стоимость в Дикси:", cheaperBasket.calculateTotalPrice(), nameWidth, priceWidth);
             s2 += "\n" + formatWithDots("Вес в Пятёрочке:", ptrchkaBasket.getTotalWeight(), nameWidth, priceWidth);
             s2 += "\n" + formatWithDots("Вес в Ленте:", lentaBasket.getTotalWeight(), nameWidth, priceWidth);
-            s2 += "\n" + formatWithDots("Мин. вес в Дикси:", basket.getTotalWeight(), nameWidth, priceWidth);
+            s2 += "\n" + formatWithDots("Мин. вес в Дикси:", cheaperBasket.getTotalWeight(), nameWidth, priceWidth);
         }
 
         if ("Лента".equals(storename_shown)) {
             s1 += "\n" + formatWithDots("Стоимость в Пятёрочке:", ptrchkaBasket.calculateTotalPrice(), nameWidth, priceWidth);
             s1 += "\n" + formatWithDots("Стоимость в Дикси:", dixyBasket.calculateTotalPrice(), nameWidth, priceWidth);
-            s1 += "\n" + formatWithDots("Мин. стоимость в Ленте:", basket.calculateTotalPrice(), nameWidth, priceWidth);
+            s1 += "\n" + formatWithDots("Мин. стоимость в Ленте:", cheaperBasket.calculateTotalPrice(), nameWidth, priceWidth);
             s2 += "\n" + formatWithDots("Вес в Пятёрочке:", ptrchkaBasket.getTotalWeight(), nameWidth, priceWidth);
             s2 += "\n" + formatWithDots("Вес в Дикси:", dixyBasket.getTotalWeight(), nameWidth, priceWidth);
-            s2 += "\n" + formatWithDots("Мин. вес в Ленте:", basket.getTotalWeight(), nameWidth, priceWidth);
+            s2 += "\n" + formatWithDots("Мин. вес в Ленте:", cheaperBasket.getTotalWeight(), nameWidth, priceWidth);
         }
         
         // Добавление в панель
