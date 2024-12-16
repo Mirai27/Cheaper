@@ -88,6 +88,14 @@ class Basket {
         notifyListeners(); // Уведомляем слушателей об изменении корзины
     }
     
+    public double calculateTotalPrice(){
+        double totalPrice = 0.0;
+        for (Map.Entry<Product, Integer> entry : products.entrySet()) {
+            totalPrice += entry.getKey().getPrice() * entry.getValue();
+        }
+        return totalPrice;
+    }
+    
     public boolean isEmpty(){
         return products.isEmpty();
     }
