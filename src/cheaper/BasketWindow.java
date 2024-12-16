@@ -39,6 +39,10 @@ public class BasketWindow extends JFrame implements BasketListener {
         setTitle("Корзина");
         setSize(1200, 600);
         setLayout(new BorderLayout());
+        
+        // Создать панель, которая будет содержать вкладки и кнопку очистки
+        JPanel tabPanel = new JPanel();
+        tabPanel.setLayout(new BorderLayout());
 
         tabbedPane = new JTabbedPane();
         summaryPanel = new JPanel(new GridLayout(3, 1));
@@ -57,10 +61,26 @@ public class BasketWindow extends JFrame implements BasketListener {
         tabbedPane.addTab("Дикси", dixyScroll);
         tabbedPane.addTab("Лента", lentaScroll);
         tabbedPane.addTab("Дешевле!", cheaperScroll);
+        
+        // Кнопка очистки корзины
+        JButton clearButton = new JButton("Очистить корзину");
+        clearButton.addActionListener((ActionEvent e) -> {
+            basket.clear(); // Очистка корзины
+            try {
+                updateBasketDisplay(); // Обновляем интерфейс после очистки
+            } catch (SQLException ex) {
+            }
+        });
+
+        // Добавляем кнопку в верхнюю часть панели с вкладками
+        tabPanel.add(tabbedPane, BorderLayout.CENTER);
+        tabPanel.add(clearButton, BorderLayout.SOUTH);
+
+        summaryPanel = new JPanel(new GridLayout(3, 1));
 
         updateBasketDisplay();
 
-        add(tabbedPane, BorderLayout.CENTER);
+        add(tabPanel, BorderLayout.CENTER); // Располагаем панель с вкладками и кнопкой в центре
         add(summaryPanel, BorderLayout.SOUTH);
         setVisible(true);
     }
