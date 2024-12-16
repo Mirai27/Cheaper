@@ -37,7 +37,7 @@ public class BasketWindow extends JFrame implements BasketListener {
         this.basket.addBasketListener(this); // Подписываемся на обновления корзины
 
         setTitle("Корзина");
-        setSize(600, 400);
+        setSize(1200, 600);
         setLayout(new BorderLayout());
 
         tabbedPane = new JTabbedPane();
@@ -106,6 +106,12 @@ public class BasketWindow extends JFrame implements BasketListener {
         } else {
             storename_shown = "";
         }
+        
+        // Создаём корзины для всех магазинов
+        Basket ptrchkaBasket = new Basket();
+        Basket dixyBasket = new Basket();
+        Basket lentaBasket = new Basket();
+        Basket cheaperBasket = new Basket();
 
         // Заполняем соответствующую вкладку
         if (!storename_shown.isEmpty() && !storename.isEmpty() && (storename != null) && (storename_shown != null)) {
@@ -115,7 +121,7 @@ public class BasketWindow extends JFrame implements BasketListener {
             JPanel cheaperPanel = (JPanel) ((JScrollPane) tabbedPane.getComponentAt(tabbedPane.indexOfTab("Дешевле!"))).getViewport().getView();
 
             // Создаем объект для отступов
-            Border labelBorder = BorderFactory.createEmptyBorder(5, 0, 5, 0);
+            Border labelBorder = BorderFactory.createEmptyBorder(5, 0, 5, 0);            
 
             for (Map.Entry<Product, Integer> entry : productsMap.entrySet()) {
                 Product product = entry.getKey();
@@ -128,6 +134,7 @@ public class BasketWindow extends JFrame implements BasketListener {
 
                     Product similarProduct = queryDatabaseForSimilarProducts(product, storename, "dixy");
                     if (similarProduct != null) {
+                        dixyBasket.addProduct(similarProduct);
                         dixyPanel.add(new JLabel(similarProduct.getName() + " - Цена: " + similarProduct.getPrice() + ", Вес: " + similarProduct.getWeight() + ", Кол-во: " + quantity) {{
                             setBorder(labelBorder);
                         }});
@@ -140,6 +147,7 @@ public class BasketWindow extends JFrame implements BasketListener {
 
                     similarProduct = queryDatabaseForSimilarProducts(product, storename, "lenta");
                     if (similarProduct != null) {
+                        lentaBasket.addProduct(similarProduct);
                         lentaPanel.add(new JLabel(similarProduct.getName() + " - Цена: " + similarProduct.getPrice() + ", Вес: " + similarProduct.getWeight() + ", Кол-во: " + quantity) {{
                             setBorder(labelBorder);
                         }});
@@ -158,6 +166,7 @@ public class BasketWindow extends JFrame implements BasketListener {
 
                     Product similarProduct = queryDatabaseForSimilarProducts(product, storename, "ptrchka");
                     if (similarProduct != null) {
+                        ptrchkaBasket.addProduct(similarProduct);
                         ptrchkaPanel.add(new JLabel(similarProduct.getName() + " - Цена: " + similarProduct.getPrice() + ", Вес: " + similarProduct.getWeight() + ", Кол-во: " + quantity) {{
                             setBorder(labelBorder);
                         }});
@@ -170,6 +179,7 @@ public class BasketWindow extends JFrame implements BasketListener {
 
                     similarProduct = queryDatabaseForSimilarProducts(product, storename, "lenta");
                     if (similarProduct != null) {
+                        lentaBasket.addProduct(similarProduct);
                         lentaPanel.add(new JLabel(similarProduct.getName() + " - Цена: " + similarProduct.getPrice() + ", Вес: " + similarProduct.getWeight() + ", Кол-во: " + quantity) {{
                             setBorder(labelBorder);
                         }});
@@ -188,6 +198,7 @@ public class BasketWindow extends JFrame implements BasketListener {
 
                     Product similarProduct = queryDatabaseForSimilarProducts(product, storename, "dixy");
                     if (similarProduct != null) {
+                        dixyBasket.addProduct(similarProduct);
                         dixyPanel.add(new JLabel(similarProduct.getName() + " - Цена: " + similarProduct.getPrice() + ", Вес: " + similarProduct.getWeight() + ", Кол-во: " + quantity) {{
                             setBorder(labelBorder);
                         }});
@@ -200,6 +211,7 @@ public class BasketWindow extends JFrame implements BasketListener {
 
                     similarProduct = queryDatabaseForSimilarProducts(product, storename, "ptrchka");
                     if (similarProduct != null) {
+                        ptrchkaBasket.addProduct(similarProduct);
                         ptrchkaPanel.add(new JLabel(similarProduct.getName() + " - Цена: " + similarProduct.getPrice() + ", Вес: " + similarProduct.getWeight() + ", Кол-во: " + quantity) {{
                             setBorder(labelBorder);
                         }});
@@ -212,15 +224,56 @@ public class BasketWindow extends JFrame implements BasketListener {
                 }
 
                 Product similarProduct = queryDatabaseForSimilarProducts(product, storename, storename);
+                cheaperBasket.addProduct(similarProduct);
                 cheaperPanel.add(new JLabel(similarProduct.getName() + " - Цена: " + similarProduct.getPrice() + ", Вес: " + similarProduct.getWeight() + ", Кол-во: " + quantity) {{
                     setBorder(labelBorder);
                 }});
             }
         }
         
-        summaryPanel.add(new JLabel(String.format("Общая стоимость: %.2f", calculateTotalPrice(productsMap))));
-        summaryPanel.add(new JLabel(String.format("Общий вес: %.2f", basket.getTotalWeight())));
-        summaryPanel.add(new JLabel("Ваша корзина собрана в магазине: " + storename_shown));
+        // Определяем ширину для различных частей строк
+        int nameWidth = 30; // Ширина для названия магазина
+        int priceWidth = 15; // Ширина для цены
+
+        // Создание форматов
+        String summaryFormat = "%-" + nameWidth + "s";
+        
+        // Создаем строки с выравниванием
+        String s1 = formatWithDots("Общая стоимость:", basket.calculateTotalPrice(), nameWidth, priceWidth);
+        String s2 = formatWithDots("Общий вес:", basket.getTotalWeight(), nameWidth, priceWidth);
+        String summary = String.format(summaryFormat, "Ваша корзина собрана в магазине: " + storename_shown);
+        
+        if ("Пятерочка".equals(storename_shown)) {
+            s1 += "\n" + formatWithDots("Стоимость в Дикси:", dixyBasket.calculateTotalPrice(), nameWidth, priceWidth);
+            s1 += "\n" + formatWithDots("Стоимость в Ленте:", lentaBasket.calculateTotalPrice(), nameWidth, priceWidth);
+            s1 += "\n" + formatWithDots("Мин. стоимость в Пятёрочке:", basket.calculateTotalPrice(), nameWidth, priceWidth);
+            s2 += "\n" + formatWithDots("Вес в Дикси:", dixyBasket.getTotalWeight(), nameWidth, priceWidth);
+            s2 += "\n" + formatWithDots("Вес в Ленте:", lentaBasket.getTotalWeight(), nameWidth, priceWidth);
+            s2 += "\n" + formatWithDots("Мин. вес в Пятёрочке:", basket.getTotalWeight(), nameWidth, priceWidth);
+        }
+
+        if ("Дикси".equals(storename_shown)) {
+            s1 += "\n" + formatWithDots("Стоимость в Пятёрочке:", ptrchkaBasket.calculateTotalPrice(), nameWidth, priceWidth);
+            s1 += "\n" + formatWithDots("Стоимость в Ленте:", lentaBasket.calculateTotalPrice(), nameWidth, priceWidth);
+            s1 += "\n" + formatWithDots("Мин. стоимость в Дикси:", basket.calculateTotalPrice(), nameWidth, priceWidth);
+            s2 += "\n" + formatWithDots("Вес в Пятёрочке:", ptrchkaBasket.getTotalWeight(), nameWidth, priceWidth);
+            s2 += "\n" + formatWithDots("Вес в Ленте:", lentaBasket.getTotalWeight(), nameWidth, priceWidth);
+            s2 += "\n" + formatWithDots("Мин. вес в Дикси:", basket.getTotalWeight(), nameWidth, priceWidth);
+        }
+
+        if ("Лента".equals(storename_shown)) {
+            s1 += "\n" + formatWithDots("Стоимость в Пятёрочке:", ptrchkaBasket.calculateTotalPrice(), nameWidth, priceWidth);
+            s1 += "\n" + formatWithDots("Стоимость в Дикси:", dixyBasket.calculateTotalPrice(), nameWidth, priceWidth);
+            s1 += "\n" + formatWithDots("Мин. стоимость в Ленте:", basket.calculateTotalPrice(), nameWidth, priceWidth);
+            s2 += "\n" + formatWithDots("Вес в Пятёрочке:", ptrchkaBasket.getTotalWeight(), nameWidth, priceWidth);
+            s2 += "\n" + formatWithDots("Вес в Дикси:", dixyBasket.getTotalWeight(), nameWidth, priceWidth);
+            s2 += "\n" + formatWithDots("Мин. вес в Ленте:", basket.getTotalWeight(), nameWidth, priceWidth);
+        }
+        
+        // Добавление в панель
+        summaryPanel.add(new JLabel("<html><pre>" + s1 + "</pre></html>"));
+        summaryPanel.add(new JLabel("<html><pre>" + s2 + "</pre></html>"));
+        summaryPanel.add(new JLabel("<html><pre>" + summary + "</pre></html>"));
         
         // Обновление интерфейса
         for (int i = 0; i < tabbedPane.getTabCount(); i++) {
@@ -233,6 +286,13 @@ public class BasketWindow extends JFrame implements BasketListener {
         summaryPanel.revalidate();
         summaryPanel.repaint();
     }
+    
+    // Функция для заполнения точками до определенной длины
+    private String formatWithDots(String name, double value, int nameWidth, int priceWidth) {
+            int dotsLength = nameWidth - name.length();
+            String dots = ".".repeat(dotsLength > 0 ? dotsLength : 0);
+            return String.format("%s%s %." + priceWidth + "f", name, dots, value);
+        }
     
     private Product findCheapestProduct(ArrayList<Product> products) {
         return products.stream().min(Comparator.comparingDouble(Product::getPrice)).orElse(null);
@@ -293,13 +353,5 @@ public class BasketWindow extends JFrame implements BasketListener {
         } catch (SQLException ex) {
             Logger.getLogger(BasketWindow.class.getName()).log(Level.SEVERE, null, ex);
         }
-    }
-
-    private double calculateTotalPrice(Map<Product, Integer> products) {
-        double totalPrice = 0.0;
-        for (Map.Entry<Product, Integer> entry : products.entrySet()) {
-            totalPrice += entry.getKey().getPrice() * entry.getValue();
-        }
-        return totalPrice;
     }
 }
