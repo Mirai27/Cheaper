@@ -93,7 +93,7 @@ public class ProductPanel extends JPanel {
 
                     if (result == JOptionPane.YES_OPTION) {
                         basket.clear();
-                        mainFrame.updateAllProductPanels(); // Обновляем все панели
+                        mainFrame.updateAllProductPanels(basket); // Обновляем все панели
                     } else {
                         // Отмена действия
                         isAdd = false;
