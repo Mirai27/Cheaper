@@ -30,19 +30,21 @@ public class BasketWindow extends JFrame implements BasketListener {
     private JPanel summaryPanel;
     private String storename;
     private String storename_shown = "";
+    private MainFrame mainFrame;
 
     // Определяем ширину для различных частей строк
-    private static final int NAME_WIDTH = 60;
-    private static final int PRICE_WIDTH = 15;
-    private static final int WEIGHT_WIDTH = 15;
-    private static final int QUANTITY_WIDTH = 15;
+    private static final int NAME_WIDTH = 45;
+    private static final int PRICE_WIDTH = 13;
+    private static final int WEIGHT_WIDTH = 13;
+    private static final int QUANTITY_WIDTH = 13;
     
     // Устанавливаем шрифт Roboto для всех JLabel
     private static final Font MONO_FONT = new Font("Monospaced", Font.PLAIN, 12);
 
-    public BasketWindow(Basket basket, ArrayList<Store> stores) throws SQLException {
+    public BasketWindow(Basket basket, ArrayList<Store> stores, MainFrame mainFrame) throws SQLException {
         this.basket = basket;
         this.stores = stores;
+        this.mainFrame = mainFrame;
         this.basket.addBasketListener(this); // Подписываемся на обновления корзины
 
         setTitle("Корзина");
@@ -79,6 +81,7 @@ public class BasketWindow extends JFrame implements BasketListener {
         JButton clearButton = new JButton("Очистить корзину");
         clearButton.addActionListener((ActionEvent e) -> {
             basket.clear(); // Очистка корзины
+            mainFrame.updateAllProductPanels(basket);
             try {
                 updateBasketDisplay(); // Обновляем интерфейс после очистки
             } catch (SQLException ex) {
@@ -180,12 +183,9 @@ public class BasketWindow extends JFrame implements BasketListener {
             for (Map.Entry<Product, Integer> entry : productsMap.entrySet()) {
                 Product product = entry.getKey();
                 int quantity = entry.getValue();
-                String formattedProduct = String.format(productFormat, product.getName(), product.getPrice(), product.getWeight(), quantity);
+                String formattedProduct = String.format(productFormat, product.getName(), product.getPrice() * quantity, product.getWeight() * quantity, quantity);
                 if ("Пятерочка".equals(storename_shown)) {
-                    ptrchkaPanel.add(new JLabel(formattedProduct) {{
-                        setBorder(labelBorder);
-                        setFont(MONO_FONT);
-                    }});
+                    ptrchkaPanel.add(createProductPanel(product, quantity, formattedProduct, labelBorder));
 
                     Product similarProduct = queryDatabaseForSimilarProducts(product, storename, "dixy");
                     if (similarProduct != null) {
@@ -215,10 +215,7 @@ public class BasketWindow extends JFrame implements BasketListener {
                 }
 
                 if ("Дикси".equals(storename_shown)) {
-                    dixyPanel.add(new JLabel(formattedProduct) {{
-                        setBorder(labelBorder);
-                        setFont(MONO_FONT);
-                    }});
+                    dixyPanel.add(createProductPanel(product, quantity, formattedProduct, labelBorder));
 
                     Product similarProduct = queryDatabaseForSimilarProducts(product, storename, "ptrchka");
                     if (similarProduct != null) {
@@ -248,10 +245,7 @@ public class BasketWindow extends JFrame implements BasketListener {
                 }
 
                 if ("Лента".equals(storename_shown)) {
-                    lentaPanel.add(new JLabel(formattedProduct) {{
-                        setBorder(labelBorder);
-                        setFont(MONO_FONT);
-                    }});
+                    lentaPanel.add(createProductPanel(product, quantity, formattedProduct, labelBorder));
 
                     Product similarProduct = queryDatabaseForSimilarProducts(product, storename, "dixy");
                     if (similarProduct != null) {
@@ -341,6 +335,7 @@ public class BasketWindow extends JFrame implements BasketListener {
         String summary = String.format(summaryFormat, "Ваша корзина собрана в магазине: " + storename_shown);
         
         if ("Пятерочка".equals(storename_shown)) {
+            tabbedPane.setSelectedIndex(0);
             s1 += "\n" + formatWithDots("Стоимость в Дикси:", dixyBasket.calculateTotalPrice());
             s1 += "\n" + formatWithDots("Стоимость в Ленте:", lentaBasket.calculateTotalPrice());
             s1 += "\n" + formatWithDots("Мин. стоимость в Пятёрочке:", cheaperBasket.calculateTotalPrice());
@@ -350,6 +345,7 @@ public class BasketWindow extends JFrame implements BasketListener {
         }
 
         if ("Дикси".equals(storename_shown)) {
+            tabbedPane.setSelectedIndex(1);
             s1 += "\n" + formatWithDots("Стоимость в Пятёрочке:", ptrchkaBasket.calculateTotalPrice());
             s1 += "\n" + formatWithDots("Стоимость в Ленте:", lentaBasket.calculateTotalPrice());
             s1 += "\n" + formatWithDots("Мин. стоимость в Дикси:", cheaperBasket.calculateTotalPrice());
@@ -359,6 +355,7 @@ public class BasketWindow extends JFrame implements BasketListener {
         }
 
         if ("Лента".equals(storename_shown)) {
+            tabbedPane.setSelectedIndex(2);
             s1 += "\n" + formatWithDots("Стоимость в Пятёрочке:", ptrchkaBasket.calculateTotalPrice());
             s1 += "\n" + formatWithDots("Стоимость в Дикси:", dixyBasket.calculateTotalPrice());
             s1 += "\n" + formatWithDots("Мин. стоимость в Ленте:", cheaperBasket.calculateTotalPrice());
@@ -382,6 +379,72 @@ public class BasketWindow extends JFrame implements BasketListener {
 
         summaryPanel.revalidate();
         summaryPanel.repaint();
+    }
+
+    public JPanel createProductPanel(Product product, int quantity, String formattedProduct, Border labelBorder) {
+        // Создаем панель для строки продукта
+        JPanel productPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
+
+        // Добавляем JLabel с информацией о продукте
+        JLabel productLabel = new JLabel(formattedProduct);
+        productLabel.setBorder(labelBorder);
+        productLabel.setFont(MONO_FONT);
+        productPanel.add(productLabel);
+
+        // Создаем кнопку "+"
+        JButton plusButton = new JButton("+");
+        plusButton.addActionListener(e -> {
+            if (basket.getTotalWeight() + product.getWeight() > 20) {
+                JOptionPane.showMessageDialog(mainFrame, "Вы достигли максимального веса в корзине", "Предупреждение", JOptionPane.WARNING_MESSAGE);
+            } else {
+                // Получаем максимальное количество товара в магазине
+                int maxQuantity = product.getTotal_quantity();
+                if (quantity < maxQuantity) {
+                    basket.addProduct(product);
+                    mainFrame.updateAllProductPanels(basket);
+                } else {
+                    // Показываем сообщение об ошибке
+                    JOptionPane.showMessageDialog(mainFrame, "Вы достигли максимального числа продуктов", "Предупреждение", JOptionPane.WARNING_MESSAGE);
+                }
+            }
+        });
+
+        // Создаем кнопку "-"
+        JButton minusButton = new JButton("-");
+        minusButton.addActionListener(e -> {
+            if (quantity == 1) {
+                int result = JOptionPane.showOptionDialog(
+                        mainFrame,
+                        "Вы точно хотите убрать продукт из корзины?",
+                        "Вопрос",
+                        JOptionPane.YES_NO_OPTION,
+                        JOptionPane.ERROR_MESSAGE,
+                        null,
+                        new Object[]{"Убрать продукт", "Отмена"},
+                        "Отмена"
+                );
+                if (result == JOptionPane.YES_OPTION) {
+                    basket.subtractProduct(product);
+                    mainFrame.updateAllProductPanels(basket);
+                }
+            } else {
+                basket.subtractProduct(product);
+                mainFrame.updateAllProductPanels(basket);
+            }
+        });
+
+        // Добавляем кнопки в панель продукта
+        productPanel.add(plusButton);
+        productPanel.add(minusButton);
+
+        // Оборачиваем панель продукта в wrapperPanel
+        JPanel wrapperPanel = new JPanel();
+        wrapperPanel.setLayout(new BoxLayout(wrapperPanel, BoxLayout.Y_AXIS));
+        wrapperPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        wrapperPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, productPanel.getPreferredSize().height));
+        wrapperPanel.add(productPanel);
+
+        return wrapperPanel;
     }
     
     // Функция для заполнения точками до определенной длины

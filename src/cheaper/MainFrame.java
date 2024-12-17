@@ -55,7 +55,7 @@ public class MainFrame extends javax.swing.JFrame {
                     basketWindow.dispose();
                 }
             try {
-                basketWindow = new BasketWindow(basket, stores);
+                basketWindow = new BasketWindow(basket, stores, this);
             } catch (SQLException ex) {
                 Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -219,11 +219,13 @@ public class MainFrame extends javax.swing.JFrame {
         return panel;
     }
     
-    public void updateAllProductPanels() {
+    public void updateAllProductPanels(Basket basket) {
         for (ProductPanel panel : productPanels) {
-            if(panel.getQuantity() != 0)
+            int trueQuantity = basket.getProducts().getOrDefault(panel.getProduct(), 0);
+            
+            if(panel.getQuantity() != trueQuantity)
             {
-                panel.setQuantity(0);
+                panel.setQuantity(trueQuantity);
                 panel.updateQuantityDisplay();
             }
         }
