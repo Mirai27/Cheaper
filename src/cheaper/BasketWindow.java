@@ -31,13 +31,22 @@ public class BasketWindow extends JFrame implements BasketListener {
     private String storename;
     private String storename_shown = "";
 
+    // Определяем ширину для различных частей строк
+    private static final int NAME_WIDTH = 60;
+    private static final int PRICE_WIDTH = 15;
+    private static final int WEIGHT_WIDTH = 15;
+    private static final int QUANTITY_WIDTH = 15;
+    
+    // Устанавливаем шрифт Roboto для всех JLabel
+    private static final Font MONO_FONT = new Font("Monospaced", Font.PLAIN, 12);
+
     public BasketWindow(Basket basket, ArrayList<Store> stores) throws SQLException {
         this.basket = basket;
         this.stores = stores;
         this.basket.addBasketListener(this); // Подписываемся на обновления корзины
 
         setTitle("Корзина");
-        setSize(1200, 600);
+        setSize(900, 600);
         setLayout(new BorderLayout());
         
         // Создать панель, которая будет содержать вкладки и кнопку очистки
@@ -46,7 +55,7 @@ public class BasketWindow extends JFrame implements BasketListener {
 
         tabbedPane = new JTabbedPane();
         summaryPanel = new JPanel(new GridLayout(3, 1));
-
+        
         // Создаем панели с прокруткой для каждой вкладки
         JScrollPane ptrchkaScroll = new JScrollPane(createScrollablePanel());
         JScrollPane dixyScroll = new JScrollPane(createScrollablePanel());
@@ -56,11 +65,15 @@ public class BasketWindow extends JFrame implements BasketListener {
         dixyScroll.getVerticalScrollBar().setUnitIncrement(16);
         lentaScroll.getVerticalScrollBar().setUnitIncrement(16);
         cheaperScroll.getVerticalScrollBar().setUnitIncrement(16);
+
         // Создаем вкладки в JTabbedPane
         tabbedPane.addTab("Пятерочка", ptrchkaScroll);
         tabbedPane.addTab("Дикси", dixyScroll);
         tabbedPane.addTab("Лента", lentaScroll);
         tabbedPane.addTab("Дешевле!", cheaperScroll);
+        
+        // Панель заголовков с форматированием
+        JPanel headerPanel = createHeaderPanel();
         
         // Кнопка очистки корзины
         JButton clearButton = new JButton("Очистить корзину");
@@ -69,12 +82,14 @@ public class BasketWindow extends JFrame implements BasketListener {
             try {
                 updateBasketDisplay(); // Обновляем интерфейс после очистки
             } catch (SQLException ex) {
+                ex.printStackTrace();
             }
         });
 
-        // Добавляем кнопку в верхнюю часть панели с вкладками
+        // Добавляем вкладки и заголовки в tabPanel
         tabPanel.add(tabbedPane, BorderLayout.CENTER);
-        tabPanel.add(clearButton, BorderLayout.SOUTH);
+        tabPanel.add(headerPanel, BorderLayout.SOUTH);
+        tabPanel.add(clearButton, BorderLayout.NORTH);
 
         summaryPanel = new JPanel(new GridLayout(3, 1));
 
@@ -83,6 +98,22 @@ public class BasketWindow extends JFrame implements BasketListener {
         add(tabPanel, BorderLayout.CENTER); // Располагаем панель с вкладками и кнопкой в центре
         add(summaryPanel, BorderLayout.SOUTH);
         setVisible(true);
+    }
+    
+    // Создаем заголовки для столбцов
+    private JPanel createHeaderPanel() {
+        JPanel headerPanel = new JPanel(new BorderLayout());
+
+        // Форматируем строку заголовков
+        String headerFormat = "%-" + NAME_WIDTH + "s %" + (PRICE_WIDTH + 4) + "s %" + (WEIGHT_WIDTH + 3) + "s %" + (QUANTITY_WIDTH + 3) + "s";
+        String formattedHeader = String.format(headerFormat, "Название", "Цена", "Вес", "Количество");
+        
+        JLabel label = new JLabel(formattedHeader);
+        label.setFont(MONO_FONT);
+
+        headerPanel.add(label, BorderLayout.WEST);
+
+        return headerPanel;
     }
 
     private JPanel createScrollablePanel() {
@@ -141,47 +172,52 @@ public class BasketWindow extends JFrame implements BasketListener {
             JPanel cheaperPanel = (JPanel) ((JScrollPane) tabbedPane.getComponentAt(tabbedPane.indexOfTab("Дешевле!"))).getViewport().getView();
 
             // Создаем объект для отступов
-            Border labelBorder = BorderFactory.createEmptyBorder(5, 0, 5, 0);            
+            Border labelBorder = BorderFactory.createEmptyBorder(5, 0, 5, 0);
+
+            // Форматирование строки продукта
+            String productFormat = "%-" + NAME_WIDTH + "s %" + PRICE_WIDTH + ".2f руб %" + WEIGHT_WIDTH + ".2f кг %" + QUANTITY_WIDTH + "d шт";   
 
             for (Map.Entry<Product, Integer> entry : productsMap.entrySet()) {
                 Product product = entry.getKey();
                 int quantity = entry.getValue();
-
+                String formattedProduct = String.format(productFormat, product.getName(), product.getPrice(), product.getWeight(), quantity);
                 if ("Пятерочка".equals(storename_shown)) {
-                    ptrchkaPanel.add(new JLabel(product.getName() + " - Цена: " + product.getPrice() + ", Вес: " + product.getWeight() + ", Кол-во: " + quantity) {{
+                    ptrchkaPanel.add(new JLabel(formattedProduct) {{
                         setBorder(labelBorder);
+                        setFont(MONO_FONT);
                     }});
 
                     Product similarProduct = queryDatabaseForSimilarProducts(product, storename, "dixy");
                     if (similarProduct != null) {
-                        
                         for (int i = 0; i < quantity; i++){
                             dixyBasket.addProduct(similarProduct);
                         }
                     } else {
-                        dixyPanel.add(new JLabel(product.getName() + " - Цена: " + product.getPrice() + ", Вес: " + product.getWeight() + ", Кол-во: " + quantity) {{
+                        dixyPanel.add(new JLabel(formattedProduct) {{
                             setForeground(Color.RED);
                             setBorder(labelBorder);
+                            setFont(MONO_FONT);
                         }});
                     }
 
                     similarProduct = queryDatabaseForSimilarProducts(product, storename, "lenta");
                     if (similarProduct != null) {
-                        
                         for (int i = 0; i < quantity; i++){
                             lentaBasket.addProduct(similarProduct);
                         }
                     } else {
-                        lentaPanel.add(new JLabel(product.getName() + " - Цена: " + product.getPrice() + ", Вес: " + product.getWeight() + ", Кол-во: " + quantity) {{
+                        lentaPanel.add(new JLabel(formattedProduct) {{
                             setForeground(Color.RED);
                             setBorder(labelBorder);
+                            setFont(MONO_FONT);
                         }});
                     }
                 }
 
                 if ("Дикси".equals(storename_shown)) {
-                    dixyPanel.add(new JLabel(product.getName() + " - Цена: " + product.getPrice() + ", Вес: " + product.getWeight() + ", Кол-во: " + quantity) {{
+                    dixyPanel.add(new JLabel(formattedProduct) {{
                         setBorder(labelBorder);
+                        setFont(MONO_FONT);
                     }});
 
                     Product similarProduct = queryDatabaseForSimilarProducts(product, storename, "ptrchka");
@@ -190,9 +226,10 @@ public class BasketWindow extends JFrame implements BasketListener {
                             ptrchkaBasket.addProduct(similarProduct);
                         }
                     } else {
-                        ptrchkaPanel.add(new JLabel(product.getName() + " - Цена: " + product.getPrice() + ", Вес: " + product.getWeight() + ", Кол-во: " + quantity) {{
+                        ptrchkaPanel.add(new JLabel(formattedProduct) {{
                             setForeground(Color.RED);
                             setBorder(labelBorder);
+                            setFont(MONO_FONT);
                         }});
                     }
 
@@ -202,16 +239,18 @@ public class BasketWindow extends JFrame implements BasketListener {
                             lentaBasket.addProduct(similarProduct);
                         }
                     } else {
-                        lentaPanel.add(new JLabel(product.getName() + " - Цена: " + product.getPrice() + ", Вес: " + product.getWeight() + ", Кол-во: " + quantity) {{
+                        lentaPanel.add(new JLabel(formattedProduct) {{
                             setForeground(Color.RED);
                             setBorder(labelBorder);
+                            setFont(MONO_FONT);
                         }});
                     }
                 }
 
                 if ("Лента".equals(storename_shown)) {
-                    lentaPanel.add(new JLabel(product.getName() + " - Цена: " + product.getPrice() + ", Вес: " + product.getWeight() + ", Кол-во: " + quantity) {{
+                    lentaPanel.add(new JLabel(formattedProduct) {{
                         setBorder(labelBorder);
+                        setFont(MONO_FONT);
                     }});
 
                     Product similarProduct = queryDatabaseForSimilarProducts(product, storename, "dixy");
@@ -220,9 +259,10 @@ public class BasketWindow extends JFrame implements BasketListener {
                             dixyBasket.addProduct(similarProduct);
                         }
                     } else {
-                        dixyPanel.add(new JLabel(product.getName() + " - Цена: " + product.getPrice() + ", Вес: " + product.getWeight() + ", Кол-во: " + quantity) {{
+                        dixyPanel.add(new JLabel(formattedProduct) {{
                             setForeground(Color.RED);
                             setBorder(labelBorder);
+                            setFont(MONO_FONT);
                         }});
                     }
 
@@ -232,9 +272,10 @@ public class BasketWindow extends JFrame implements BasketListener {
                             ptrchkaBasket.addProduct(similarProduct);
                         }
                     } else {
-                        ptrchkaPanel.add(new JLabel(product.getName() + " - Цена: " + product.getPrice() + ", Вес: " + product.getWeight() + ", Кол-во: " + quantity) {{
+                        ptrchkaPanel.add(new JLabel(formattedProduct) {{
                             setForeground(Color.RED);
                             setBorder(labelBorder);
+                            setFont(MONO_FONT);
                         }});
                     }
                 }
@@ -244,78 +285,86 @@ public class BasketWindow extends JFrame implements BasketListener {
                     cheaperBasket.addProduct(similarProduct);
                 }
             }
+            
             HashMap<Product, Integer> ptrchkaProductsMap = ptrchkaBasket.getProducts();
             HashMap<Product, Integer> dixyProductsMap = dixyBasket.getProducts();
             HashMap<Product, Integer> lentaProductsMap = lentaBasket.getProducts();
             HashMap<Product, Integer> cheaperProductsMap = cheaperBasket.getProducts();
+            // Форматирование товаров и добавление в панели
             for (Map.Entry<Product, Integer> entry : ptrchkaProductsMap.entrySet()) {
                 Product product = entry.getKey();
                 int quantity = entry.getValue();
-                System.out.println(product.getId());
-                ptrchkaPanel.add(new JLabel(product.getName() + " - Цена: " + product.getPrice() + ", Вес: " + product.getWeight() + ", Кол-во: " + quantity) {{
+                String formattedProduct = String.format(productFormat, product.getName(), product.getPrice(), product.getWeight(), quantity);
+                ptrchkaPanel.add(new JLabel(formattedProduct) {{
                     setBorder(labelBorder);
+                    setFont(MONO_FONT);
                 }});
             }
+
             for (Map.Entry<Product, Integer> entry : dixyProductsMap.entrySet()) {
                 Product product = entry.getKey();
                 int quantity = entry.getValue();
-                dixyPanel.add(new JLabel(product.getName() + " - Цена: " + product.getPrice() + ", Вес: " + product.getWeight() + ", Кол-во: " + quantity) {{
+                String formattedProduct = String.format(productFormat, product.getName(), product.getPrice(), product.getWeight(), quantity);
+                dixyPanel.add(new JLabel(formattedProduct) {{
                     setBorder(labelBorder);
+                    setFont(MONO_FONT);
                 }});
             }
+
             for (Map.Entry<Product, Integer> entry : lentaProductsMap.entrySet()) {
                 Product product = entry.getKey();
                 int quantity = entry.getValue();
-                lentaPanel.add(new JLabel(product.getName() + " - Цена: " + product.getPrice() + ", Вес: " + product.getWeight() + ", Кол-во: " + quantity) {{
+                String formattedProduct = String.format(productFormat, product.getName(), product.getPrice(), product.getWeight(), quantity);
+                lentaPanel.add(new JLabel(formattedProduct) {{
                     setBorder(labelBorder);
+                    setFont(MONO_FONT);
                 }});
             }
+
             for (Map.Entry<Product, Integer> entry : cheaperProductsMap.entrySet()) {
                 Product product = entry.getKey();
                 int quantity = entry.getValue();
-                cheaperPanel.add(new JLabel(product.getName() + " - Цена: " + product.getPrice() + ", Вес: " + product.getWeight() + ", Кол-во: " + quantity) {{
+                String formattedProduct = String.format(productFormat, product.getName(), product.getPrice(), product.getWeight(), quantity);
+                cheaperPanel.add(new JLabel(formattedProduct) {{
                     setBorder(labelBorder);
+                    setFont(MONO_FONT);
                 }});
             }
         }
-        
-        // Определяем ширину для различных частей строк
-        int nameWidth = 30; // Ширина для названия магазина
-        int priceWidth = 15; // Ширина для цены
 
         // Создание форматов
-        String summaryFormat = "%-" + nameWidth + "s";
+        String summaryFormat = "%-" + NAME_WIDTH + "s";
         
         // Создаем строки с выравниванием
-        String s1 = formatWithDots("Общая стоимость:", basket.calculateTotalPrice(), nameWidth, priceWidth);
-        String s2 = formatWithDots("Общий вес:", basket.getTotalWeight(), nameWidth, priceWidth);
+        String s1 = formatWithDots("Общая стоимость:", basket.calculateTotalPrice());
+        String s2 = formatWithDots("Общий вес:", basket.getTotalWeight());
         String summary = String.format(summaryFormat, "Ваша корзина собрана в магазине: " + storename_shown);
         
         if ("Пятерочка".equals(storename_shown)) {
-            s1 += "\n" + formatWithDots("Стоимость в Дикси:", dixyBasket.calculateTotalPrice(), nameWidth, priceWidth);
-            s1 += "\n" + formatWithDots("Стоимость в Ленте:", lentaBasket.calculateTotalPrice(), nameWidth, priceWidth);
-            s1 += "\n" + formatWithDots("Мин. стоимость в Пятёрочке:", cheaperBasket.calculateTotalPrice(), nameWidth, priceWidth);
-            s2 += "\n" + formatWithDots("Вес в Дикси:", dixyBasket.getTotalWeight(), nameWidth, priceWidth);
-            s2 += "\n" + formatWithDots("Вес в Ленте:", lentaBasket.getTotalWeight(), nameWidth, priceWidth);
-            s2 += "\n" + formatWithDots("Мин. вес в Пятёрочке:", cheaperBasket.getTotalWeight(), nameWidth, priceWidth);
+            s1 += "\n" + formatWithDots("Стоимость в Дикси:", dixyBasket.calculateTotalPrice());
+            s1 += "\n" + formatWithDots("Стоимость в Ленте:", lentaBasket.calculateTotalPrice());
+            s1 += "\n" + formatWithDots("Мин. стоимость в Пятёрочке:", cheaperBasket.calculateTotalPrice());
+            s2 += "\n" + formatWithDots("Вес в Дикси:", dixyBasket.getTotalWeight());
+            s2 += "\n" + formatWithDots("Вес в Ленте:", lentaBasket.getTotalWeight());
+            s2 += "\n" + formatWithDots("Мин. вес в Пятёрочке:", cheaperBasket.getTotalWeight());
         }
 
         if ("Дикси".equals(storename_shown)) {
-            s1 += "\n" + formatWithDots("Стоимость в Пятёрочке:", ptrchkaBasket.calculateTotalPrice(), nameWidth, priceWidth);
-            s1 += "\n" + formatWithDots("Стоимость в Ленте:", lentaBasket.calculateTotalPrice(), nameWidth, priceWidth);
-            s1 += "\n" + formatWithDots("Мин. стоимость в Дикси:", cheaperBasket.calculateTotalPrice(), nameWidth, priceWidth);
-            s2 += "\n" + formatWithDots("Вес в Пятёрочке:", ptrchkaBasket.getTotalWeight(), nameWidth, priceWidth);
-            s2 += "\n" + formatWithDots("Вес в Ленте:", lentaBasket.getTotalWeight(), nameWidth, priceWidth);
-            s2 += "\n" + formatWithDots("Мин. вес в Дикси:", cheaperBasket.getTotalWeight(), nameWidth, priceWidth);
+            s1 += "\n" + formatWithDots("Стоимость в Пятёрочке:", ptrchkaBasket.calculateTotalPrice());
+            s1 += "\n" + formatWithDots("Стоимость в Ленте:", lentaBasket.calculateTotalPrice());
+            s1 += "\n" + formatWithDots("Мин. стоимость в Дикси:", cheaperBasket.calculateTotalPrice());
+            s2 += "\n" + formatWithDots("Вес в Пятёрочке:", ptrchkaBasket.getTotalWeight());
+            s2 += "\n" + formatWithDots("Вес в Ленте:", lentaBasket.getTotalWeight());
+            s2 += "\n" + formatWithDots("Мин. вес в Дикси:", cheaperBasket.getTotalWeight());
         }
 
         if ("Лента".equals(storename_shown)) {
-            s1 += "\n" + formatWithDots("Стоимость в Пятёрочке:", ptrchkaBasket.calculateTotalPrice(), nameWidth, priceWidth);
-            s1 += "\n" + formatWithDots("Стоимость в Дикси:", dixyBasket.calculateTotalPrice(), nameWidth, priceWidth);
-            s1 += "\n" + formatWithDots("Мин. стоимость в Ленте:", cheaperBasket.calculateTotalPrice(), nameWidth, priceWidth);
-            s2 += "\n" + formatWithDots("Вес в Пятёрочке:", ptrchkaBasket.getTotalWeight(), nameWidth, priceWidth);
-            s2 += "\n" + formatWithDots("Вес в Дикси:", dixyBasket.getTotalWeight(), nameWidth, priceWidth);
-            s2 += "\n" + formatWithDots("Мин. вес в Ленте:", cheaperBasket.getTotalWeight(), nameWidth, priceWidth);
+            s1 += "\n" + formatWithDots("Стоимость в Пятёрочке:", ptrchkaBasket.calculateTotalPrice());
+            s1 += "\n" + formatWithDots("Стоимость в Дикси:", dixyBasket.calculateTotalPrice());
+            s1 += "\n" + formatWithDots("Мин. стоимость в Ленте:", cheaperBasket.calculateTotalPrice());
+            s2 += "\n" + formatWithDots("Вес в Пятёрочке:", ptrchkaBasket.getTotalWeight());
+            s2 += "\n" + formatWithDots("Вес в Дикси:", dixyBasket.getTotalWeight());
+            s2 += "\n" + formatWithDots("Мин. вес в Ленте:", cheaperBasket.getTotalWeight());
         }
         
         // Добавление в панель
@@ -336,10 +385,10 @@ public class BasketWindow extends JFrame implements BasketListener {
     }
     
     // Функция для заполнения точками до определенной длины
-    private String formatWithDots(String name, double value, int nameWidth, int priceWidth) {
-            int dotsLength = nameWidth - name.length();
+    private String formatWithDots(String name, double value) {
+            int dotsLength = NAME_WIDTH - name.length();
             String dots = ".".repeat(dotsLength > 0 ? dotsLength : 0);
-            return String.format("%s%s %." + priceWidth + "f", name, dots, value);
+            return String.format("%s%s %.2f", name, dots, value);  
         }
     
     private Product findCheapestProduct(ArrayList<Product> products) {
