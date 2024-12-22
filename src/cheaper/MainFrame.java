@@ -136,6 +136,7 @@ public class MainFrame extends javax.swing.JFrame {
         
         // Добавление ActionListener к каждой радиокнопке
         ActionListener actionListener = (ActionEvent e) -> {
+            jTextField2.setText("");
             JRadioButton selectedButton = (JRadioButton) e.getSource();
             if ("Все".equals(selectedButton.getText())) {
                 for (int i = 0; i < storePanels.size(); i++) {
@@ -170,6 +171,7 @@ public class MainFrame extends javax.swing.JFrame {
                     tabbedPane.repaint();
                 }
             }
+            selectedButton.setSelected(true);
         };
         ButtonGroup categoriesGroup = new ButtonGroup();
         JRadioButton allButton = new JRadioButton("Все");
@@ -203,7 +205,8 @@ public class MainFrame extends javax.swing.JFrame {
 
             private void handleTextFieldChange() {
                 if (jTextField2.getText().trim().isEmpty()) {
-                            String searchText = jTextField2.getText().toLowerCase().trim();
+                    allButton.setSelected(true);
+                String searchText = jTextField2.getText().toLowerCase().trim();
         for (int i = 0; i < storePanels.size(); i++) {
             copyPanelContents(storePanelsOriginal.get(i), storePanels.get(i), basket);
             if (!searchText.isEmpty()) {
@@ -229,6 +232,7 @@ public class MainFrame extends javax.swing.JFrame {
         });
         // Добавляем ActionListener для поля поиска
         jTextField2.addActionListener(e -> {
+        allButton.setSelected(true);
         String searchText = jTextField2.getText().toLowerCase();
         for (int i = 0; i < storePanels.size(); i++) {
             copyPanelContents(storePanelsOriginal.get(i), storePanels.get(i), basket);
@@ -251,6 +255,7 @@ public class MainFrame extends javax.swing.JFrame {
     });
         // Добавляем ActionListener для кнопки поиска
         jButton2.addActionListener(e -> {
+        allButton.setSelected(true);
         String searchText = jTextField2.getText().toLowerCase();
         for (int i = 0; i < storePanels.size(); i++) {
             copyPanelContents(storePanelsOriginal.get(i), storePanels.get(i), basket);
