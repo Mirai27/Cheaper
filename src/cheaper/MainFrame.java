@@ -33,6 +33,8 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 
 /**
  *
@@ -60,6 +62,9 @@ public class MainFrame extends javax.swing.JFrame {
                 Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
             }
             });
+
+
+
         JTabbedPane tabbedPane = new JTabbedPane();
         // Создание панелей с продуктами
         JPanel storePanel0 = createProductPanel(stores.get(0), basket);
@@ -94,9 +99,9 @@ public class MainFrame extends javax.swing.JFrame {
         scrollPane1.getVerticalScrollBar().setUnitIncrement(16);
         scrollPane2.getVerticalScrollBar().setUnitIncrement(16);
         
-        tabbedPane.addTab("Магазин 0", scrollPane0);
-        tabbedPane.addTab("Магазин 1", scrollPane1);
-        tabbedPane.addTab("Магазин 2", scrollPane2);
+        tabbedPane.addTab("Пятерочка", scrollPane0);
+        tabbedPane.addTab("Дикси", scrollPane1);
+        tabbedPane.addTab("Лента", scrollPane2);
         
         addComponentListener(new ComponentAdapter() {
             @Override
@@ -178,6 +183,94 @@ public class MainFrame extends javax.swing.JFrame {
             categoriesGroup.add(button);
             jPanel3.add(button);
         }
+
+         // Добавляем DocumentListener для отслеживания изменений текста
+        jTextField2.getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                handleTextFieldChange();
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                handleTextFieldChange();
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                handleTextFieldChange();
+            }
+
+            private void handleTextFieldChange() {
+                if (jTextField2.getText().trim().isEmpty()) {
+                            String searchText = jTextField2.getText().toLowerCase().trim();
+        for (int i = 0; i < storePanels.size(); i++) {
+            copyPanelContents(storePanelsOriginal.get(i), storePanels.get(i), basket);
+            if (!searchText.isEmpty()) {
+                for (Component component : storePanels.get(i).getComponents()) {
+                    if (component instanceof ProductPanel) {
+                        ProductPanel productPanel = (ProductPanel) component;
+                        String productName = productPanel.getProduct().getName().toLowerCase();
+                        if (!productName.contains(searchText)) {
+                            storePanels.get(i).remove(productPanel);
+                        }
+                    }
+                }
+            }
+            storePanels.get(i).revalidate();     
+            storePanels.get(i).repaint();        
+            scrollPanes.get(i).revalidate();
+            scrollPanes.get(i).repaint();
+        }
+        tabbedPane.revalidate();
+        tabbedPane.repaint();
+                }
+            }
+        });
+        // Добавляем ActionListener для поля поиска
+        jTextField2.addActionListener(e -> {
+        String searchText = jTextField2.getText().toLowerCase();
+        for (int i = 0; i < storePanels.size(); i++) {
+            copyPanelContents(storePanelsOriginal.get(i), storePanels.get(i), basket);
+            for (Component component : storePanels.get(i).getComponents()) {
+                if (component instanceof ProductPanel) {
+                    ProductPanel productPanel = (ProductPanel) component;
+                    String productName = productPanel.getProduct().getName().toLowerCase();
+                    if (!productName.contains(searchText)) {
+                        storePanels.get(i).remove(productPanel);
+                    }
+                }
+            }
+            storePanels.get(i).revalidate();     
+            storePanels.get(i).repaint();        
+            scrollPanes.get(i).revalidate();
+            scrollPanes.get(i).repaint();
+        }
+        tabbedPane.revalidate();
+        tabbedPane.repaint();
+    });
+        // Добавляем ActionListener для кнопки поиска
+        jButton2.addActionListener(e -> {
+        String searchText = jTextField2.getText().toLowerCase();
+        for (int i = 0; i < storePanels.size(); i++) {
+            copyPanelContents(storePanelsOriginal.get(i), storePanels.get(i), basket);
+            for (Component component : storePanels.get(i).getComponents()) {
+                if (component instanceof ProductPanel) {
+                    ProductPanel productPanel = (ProductPanel) component;
+                    String productName = productPanel.getProduct().getName().toLowerCase();
+                    if (!productName.contains(searchText)) {
+                        storePanels.get(i).remove(productPanel);
+                    }
+                }
+            }
+            storePanels.get(i).revalidate();     
+            storePanels.get(i).repaint();        
+            scrollPanes.get(i).revalidate();
+            scrollPanes.get(i).repaint();
+        }
+        tabbedPane.revalidate();
+        tabbedPane.repaint();
+    });
         
         pack();
         setExtendedState(JFrame.MAXIMIZED_BOTH); 
