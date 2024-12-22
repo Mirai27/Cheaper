@@ -392,8 +392,6 @@ public class MainFrame extends javax.swing.JFrame {
 
         jPanel1.setBackground(new java.awt.Color(220, 242, 220));
         jPanel1.setLayout(new java.awt.GridBagLayout());
-
-        jTextField2.setText("jTextField2");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 0;
